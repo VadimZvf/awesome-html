@@ -1,14 +1,4 @@
 {
     "parser": "babel-eslint",
-    "extends": "react-app",
-    "plugins": ["flowtype", "react-hooks"],
-    "rules": {
-        "no-use-before-define": "off",
-        // "flowtype/require-exact-type": ["warn", "always"],
-        "react-hooks/rules-of-hooks": "error",
-        "react-hooks/exhaustive-deps": "warn"
-    },
-    "globals": {
-        "PROJECT_ENV": true
-    }
+    "extends": ["eslint:recommended", "plugin:jest/recommended"]
 }
