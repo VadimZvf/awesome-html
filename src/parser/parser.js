@@ -143,7 +143,7 @@ function getPreparedTags(sourceTags) {
 
 // ПРавильно ли это называть AST? O_O
 // получаем дерево из списка тегов
-export function getAST(sourceTags) {
+export function getTree(sourceTags) {
     const tags = getPreparedTags(sourceTags);
     const tagsMap = {};
 
@@ -236,8 +236,11 @@ export function getAST(sourceTags) {
 }
 
 // возвращает готовую AST
-function parse() {
-    return 1;
+function parse(sourceString) {
+    const tags = getTags(sourceString);
+    const tree = getTree(tags);
+
+    return tree;
 }
 
 export default parse;

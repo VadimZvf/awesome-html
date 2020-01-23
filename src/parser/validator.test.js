@@ -3,6 +3,7 @@ import validate from './validator';
 
 const divNode = { name: 'div', type: 'tag', role: 'open', attributes: [], children: [] };
 const htmlNode = { name: 'html', type: 'tag', role: 'open', attributes: [], children: [] };
+const textNode = { type: 'text', text: 'some text' };
 
 test('Should be valid with simple template', () => {
     /**
@@ -30,6 +31,28 @@ test('Should be valid with simple template', () => {
     const mockedTag = { ...tags.div, visitor: jest.fn() };
     expect(validate(tree, map, [mockedTag])).toEqual(true);
     expect(mockedTag.visitor).toHaveBeenCalledTimes(2);
+});
+
+test('Text should be valid', () => {
+    /**
+     * <div>wow</div>
+     */
+    const tree = {
+        ...divNode,
+        id: 0,
+        parentId: null,
+        children: [{ ...textNode, id: 1, parentId: 0 }]
+    };
+    const map = {
+        0: {
+            ...divNode,
+            id: 0,
+            parentId: null,
+            children: [{ ...textNode, id: 1, parentId: 0 }]
+        },
+        1: { ...textNode, id: 1, parentId: 0 }
+    };
+    expect(validate(tree, map, [tags.div, tags.html])).toEqual(true);
 });
 
 test('Should be valid with nested tags', () => {
@@ -128,4 +151,30 @@ test('Should validate nesting', () => {
     };
 
     expect(() => validate(tree, map, [tags.div, tags.html])).toThrow('👨🏾‍🦳 Тег html может быть только родителем');
+});
+
+test('Should validate roots count', () => {
+    /**
+     * <html></html>
+     * <div></div>
+     */
+    const tree = {
+        ...htmlNode,
+        id: 0,
+        parentId: null,
+        attributes: [],
+        children: [{ ...divNode, id: 1, parentId: null }]
+    };
+    const map = {
+        0: {
+            ...htmlNode,
+            id: 0,
+            parentId: null,
+            attributes: [],
+            children: [{ ...divNode, id: 1, parentId: null }]
+        },
+        1: { ...divNode, id: 1, parentId: null }
+    };
+
+    expect(() => validate(tree, map, [tags.div, tags.html])).toThrow('🌳 Возможен только один корень у дерева');
 });

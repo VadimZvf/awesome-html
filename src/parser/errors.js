@@ -28,6 +28,11 @@ export const INVALID_TAG = {
     getMessage: node => `👽 Неизвестный тег "${node.name}"`
 };
 
+export const TOO_MANY_ROOTS = {
+    code: 'TOO_MANY_ROOTS',
+    getMessage: () => `🌳 Возможен только один корень у дерева`
+};
+
 export const DIV_WRONG_ATTRIBUTE = {
     code: 'DIV_WRONG_ATTRIBUTE',
     getMessage: attr => `👽 Неизвестный аттрибут "${attr.name}". У тега div такого не бывает`

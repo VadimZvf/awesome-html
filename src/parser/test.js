@@ -1,4 +1,4 @@
-import { getTags, getTagInfo, getAttributesInfo, getAST } from './parser';
+import parse, { getTags, getTagInfo, getAttributesInfo, getTree } from './parser';
 
 describe('getTagInfo', () => {
     test('Should detect open tag', () => {
@@ -164,7 +164,7 @@ describe('getTags', () => {
     });
 });
 
-describe('getAST', () => {
+describe('getTree', () => {
     const textNode = { type: 'text', text: 'some text' };
     const openDivTag = { name: 'div', type: 'tag', role: 'open' };
     const closeDivTag = { name: 'div', type: 'tag', role: 'close' };
@@ -180,7 +180,7 @@ describe('getAST', () => {
          *    <div></div>
          * </div>
          */
-        expect(getAST([openDivTag, openDivTag, closeDivTag, closeDivTag])).toStrictEqual({
+        expect(getTree([openDivTag, openDivTag, closeDivTag, closeDivTag])).toStrictEqual({
             tree: {
                 ...openDivTag,
                 id: 0,
@@ -203,7 +203,7 @@ describe('getAST', () => {
          *    <div></div>
          * </div>
          */
-        expect(getAST([openDivTag, openDivTag, closeDivTag, openDivTag, closeDivTag, closeDivTag])).toStrictEqual({
+        expect(getTree([openDivTag, openDivTag, closeDivTag, openDivTag, closeDivTag, closeDivTag])).toStrictEqual({
             tree: {
                 ...openDivTag,
                 id: 0,
@@ -234,7 +234,7 @@ describe('getAST', () => {
          *    </div>
          * </div>
          */
-        expect(getAST([openDivTag, openDivTag, openDivTag, closeDivTag, closeDivTag, closeDivTag])).toStrictEqual({
+        expect(getTree([openDivTag, openDivTag, openDivTag, closeDivTag, closeDivTag, closeDivTag])).toStrictEqual({
             tree: {
                 ...openDivTag,
                 id: 0,
@@ -276,7 +276,7 @@ describe('getAST', () => {
          *    <div/>
          * </div>
          */
-        expect(getAST([openDivTag, openCloseDivTag, closeDivTag])).toStrictEqual({
+        expect(getTree([openDivTag, openCloseDivTag, closeDivTag])).toStrictEqual({
             tree: {
                 ...openDivTag,
                 id: 0,
@@ -299,7 +299,7 @@ describe('getAST', () => {
         /**
          * <div>some text</div>
          */
-        expect(getAST([openDivTag, textNode, closeDivTag])).toStrictEqual({
+        expect(getTree([openDivTag, textNode, closeDivTag])).toStrictEqual({
             tree: {
                 ...openDivTag,
                 id: 0,
@@ -319,7 +319,7 @@ describe('getAST', () => {
         /**
          * some text
          */
-        expect(getAST([textNode])).toStrictEqual({
+        expect(getTree([textNode])).toStrictEqual({
             tree: { ...textNode, id: 0, parentId: null, children: [] },
             map: {
                 0: { ...textNode, id: 0, parentId: null, children: [] }
@@ -331,7 +331,7 @@ describe('getAST', () => {
          *     <div></div>
          * </div>
          */
-        expect(getAST([openDivTag, textNode, openDivTag, closeDivTag, closeDivTag])).toStrictEqual({
+        expect(getTree([openDivTag, textNode, openDivTag, closeDivTag, closeDivTag])).toStrictEqual({
             tree: {
                 ...openDivTag,
                 id: 0,
@@ -365,7 +365,7 @@ describe('getAST', () => {
          * </div>
          */
         expect(
-            getAST([
+            getTree([
                 openDivTag,
                 openDivTag,
                 textNode,
@@ -437,11 +437,11 @@ describe('getAST', () => {
         /**
          * <div></span>
          */
-        expect(() => getAST([openDivTag, closeSpanTag])).toThrow('😱 Воу воу... Сначала надо открыть тег "span"');
+        expect(() => getTree([openDivTag, closeSpanTag])).toThrow('😱 Воу воу... Сначала надо открыть тег "span"');
         /**
          * <div></div></div>
          */
-        expect(() => getAST([openDivTag, closeDivTag, closeDivTag])).toThrow(
+        expect(() => getTree([openDivTag, closeDivTag, closeDivTag])).toThrow(
             '😱 Воу воу... Сначала надо открыть тег "div"'
         );
 
@@ -449,7 +449,7 @@ describe('getAST', () => {
         const closeSpanTagWithSRC = { ...closeSpanTag, source: { start: 7, end: 11 } };
 
         // Должен передать и source чтобы мы смогли отрисовать ошибку
-        expect(() => getAST([openDivTagWithSCR, closeSpanTagWithSRC])).toThrow(
+        expect(() => getTree([openDivTagWithSCR, closeSpanTagWithSRC])).toThrow(
             expect.objectContaining({ source: closeSpanTagWithSRC.source })
         );
     });
@@ -458,17 +458,129 @@ describe('getAST', () => {
         /**
          * <div></div><div>
          */
-        expect(() => getAST([openDivTag, closeDivTag, openDivTag])).toThrow('😭 Забыли закрыть тег "div"');
+        expect(() => getTree([openDivTag, closeDivTag, openDivTag])).toThrow('😭 Забыли закрыть тег "div"');
         /**
          * <div><div></div>
          */
-        expect(() => getAST([openDivTag, openDivTag, closeDivTag])).toThrow('😭 Забыли закрыть тег "div"');
+        expect(() => getTree([openDivTag, openDivTag, closeDivTag])).toThrow('😭 Забыли закрыть тег "div"');
 
         const openDivTagWithSRC = { ...openDivTag, source: { start: 7, end: 11 } };
 
         // Должен передать и source чтобы мы смогли отрисовать ошибку
-        expect(() => getAST([openDivTag, closeDivTag, openDivTagWithSRC])).toThrow(
+        expect(() => getTree([openDivTag, closeDivTag, openDivTagWithSRC])).toThrow(
             expect.objectContaining({ source: openDivTagWithSRC.source })
         );
+    });
+});
+
+// TODO: Dummy test(, add more tests
+test('parse', () => {
+    expect(
+        parse(`
+    <html>
+        <div class="wow">
+            <div id="foo">
+            </div>
+        </div>
+    </html>
+    `)
+    ).toStrictEqual({
+        tree: {
+            role: 'open',
+            type: 'tag',
+            name: 'html',
+            attributes: [],
+            source: { startIndex: 5, endIndex: 10 },
+            id: 0,
+            parentId: null,
+            children: [
+                {
+                    role: 'open',
+                    type: 'tag',
+                    name: 'div',
+                    attributes: [{ name: 'class', value: 'wow' }],
+                    source: { startIndex: 20, endIndex: 36 },
+                    id: 1,
+                    parentId: 0,
+                    children: [
+                        {
+                            role: 'open',
+                            type: 'tag',
+                            name: 'div',
+                            attributes: [{ name: 'id', value: 'foo' }],
+                            source: { startIndex: 50, endIndex: 63 },
+                            id: 2,
+                            parentId: 1,
+                            children: []
+                        }
+                    ]
+                }
+            ]
+        },
+        map: {
+            '0': {
+                role: 'open',
+                type: 'tag',
+                name: 'html',
+                attributes: [],
+                source: { startIndex: 5, endIndex: 10 },
+                id: 0,
+                parentId: null,
+                children: [
+                    {
+                        role: 'open',
+                        type: 'tag',
+                        name: 'div',
+                        attributes: [{ name: 'class', value: 'wow' }],
+                        source: { startIndex: 20, endIndex: 36 },
+                        id: 1,
+                        parentId: 0,
+                        children: [
+                            {
+                                role: 'open',
+                                type: 'tag',
+                                name: 'div',
+                                attributes: [{ name: 'id', value: 'foo' }],
+                                source: { startIndex: 50, endIndex: 63 },
+                                id: 2,
+                                parentId: 1,
+                                children: []
+                            }
+                        ]
+                    }
+                ]
+            },
+            '1': {
+                role: 'open',
+                type: 'tag',
+                name: 'div',
+                attributes: [{ name: 'class', value: 'wow' }],
+                source: { startIndex: 20, endIndex: 36 },
+                id: 1,
+                parentId: 0,
+                children: [
+                    {
+                        role: 'open',
+                        type: 'tag',
+                        name: 'div',
+                        attributes: [{ name: 'id', value: 'foo' }],
+                        source: { startIndex: 50, endIndex: 63 },
+                        id: 2,
+                        parentId: 1,
+                        children: []
+                    }
+                ]
+            },
+            '2': {
+                role: 'open',
+                type: 'tag',
+                name: 'div',
+                attributes: [{ name: 'id', value: 'foo' }],
+                source: { startIndex: 50, endIndex: 63 },
+                id: 2,
+                parentId: 1,
+                children: []
+            }
+        }
     });
 });
