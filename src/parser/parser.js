@@ -28,10 +28,10 @@ export function getTagInfo(tagString, startIndex, endIndex) {
     let isCloseTag = /^\/.*$/.test(trimmedTagString); // </div>
     let isSelfClosed = /^.*\/$/.test(trimmedTagString); // <div/>
     let role = 'open';
-    if (isSelfClosed) {
-        role = 'open-close';
-    } else if (isCloseTag) {
+    if (isCloseTag) {
         role = 'close';
+    } else if (isSelfClosed) {
+        role = 'open-close';
     }
 
     // TODO: добавить более подробные сорсы для тега

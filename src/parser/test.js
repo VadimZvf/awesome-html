@@ -91,6 +91,9 @@ describe('getTags', () => {
         expect(getTags('<>')).toStrictEqual([
             { name: '', type: 'tag', role: 'open', attributes: [], source: { startIndex: 0, endIndex: 1 } }
         ]);
+        expect(getTags('</>')).toStrictEqual([
+            { name: '', type: 'tag', role: 'close', attributes: [], source: { startIndex: 0, endIndex: 2 } }
+        ]);
     });
     test('Should trim string tag', () => {
         expect(getTags('<   div    >  ')).toStrictEqual([
