@@ -1,14 +1,19 @@
 function isEmptyString(str) {
-    return str.replace(/\s/g, '').length === 0;
+    return str.trim().length === 0;
 }
 
 export function getAttributesInfo(attributesString) {
     // TODO: добавить булевые аттрибуты
-    const attributeRegexp = /(\w+?)\=["']([\w\s]+?)["']/gi;
     let matches;
     const attributes = [];
 
-    while ((matches = attributeRegexp.exec(attributesString)) !== null) {
+    const singleQuoteAttributeRegexp = /(\w+?)\='([\w\s]+?)'/gi;
+    while ((matches = singleQuoteAttributeRegexp.exec(attributesString)) !== null) {
+        attributes.push({ name: matches[1], value: matches[2] });
+    }
+
+    const doubleQuoteAttributeRegexp = /(\w+?)\="([\w\s]+?)"/gi;
+    while ((matches = doubleQuoteAttributeRegexp.exec(attributesString)) !== null) {
         attributes.push({ name: matches[1], value: matches[2] });
     }
 
@@ -16,8 +21,10 @@ export function getAttributesInfo(attributesString) {
 }
 
 export function getTagInfo(tagString, startIndex, endIndex) {
-    let isCloseTag = /^\/.*$/.test(tagString); // </div>
-    let isSelfClosed = /^.*\/$/.test(tagString); // <div/>
+    const trimmedTagString = tagString.trim();
+
+    let isCloseTag = /^\/.*$/.test(trimmedTagString); // </div>
+    let isSelfClosed = /^.*\/$/.test(trimmedTagString); // <div/>
     let role = 'open';
     if (isSelfClosed) {
         role = 'open-close';
@@ -27,9 +34,9 @@ export function getTagInfo(tagString, startIndex, endIndex) {
 
     // TODO: добавить более подробные сорсы для тега
     const tagNameRegexp = /^\/?([^\s\/]+).*?\/?$/gi;
-    const tagName = tagNameRegexp.exec(tagString)[1];
+    const tagName = tagNameRegexp.exec(trimmedTagString)[1];
 
-    const attributesString = tagString.replace(/^\/?([^\s\/]+)/gi, '').replace(/\/$/gi, '');
+    const attributesString = trimmedTagString.replace(/^\/?([^\s\/]+)/i, '').replace(/\/$/i, '');
 
     return {
         role,
@@ -106,6 +113,85 @@ export function getTags(inputValue = '') {
     }
 
     return foundTagItems;
+}
+
+function getPreparedTags(sourceTags) {
+    return sourceTags.map((tag, index) => ({ ...tag, id: index, parentId: null, children: [] }));
+}
+
+// ПРавильно ли это называть AST? O_O
+// получаем дерево из списка тегов
+export function getAST(sourceTags) {
+    const tags = getPreparedTags(sourceTags);
+    const tagsMap = {};
+
+    // делаем простой словарик, чтобы легко получать элемент
+    for (const tag of tags) {
+        // сохраняем только теги открытия, тк дубли не нужны
+        if (tag.role === 'open') {
+            tagsMap[tag.id] = tag;
+        }
+
+        if (tag.role === 'open-close') {
+            tagsMap[tag.id] = tag;
+        }
+
+        if (tag.type === 'text') {
+            tagsMap[tag.id] = tag;
+        }
+    }
+
+    const currentOpenTags = [];
+    let tree = null;
+
+    for (let index = 0; index < tags.length; index++) {
+        const currentTag = tags[index];
+        const lastOpenTag = currentOpenTags[currentOpenTags.length - 1];
+
+        if (currentTag.type === 'text') {
+            if (lastOpenTag) {
+                // Зачем текстовой ноде id родителя? О_о
+                // будем искать по тексту?
+                currentTag.parentId = lastOpenTag.id;
+                lastOpenTag.children.push(currentTag);
+            } else {
+                // это первая нода в дереве
+                tree = currentTag;
+            }
+        }
+
+        if (currentTag.role === 'open') {
+            if (lastOpenTag) {
+                currentTag.parentId = lastOpenTag.id;
+                lastOpenTag.children.push(currentTag);
+            } else {
+                // это первая нода в дереве
+                tree = currentTag;
+            }
+
+            currentOpenTags.push(currentTag);
+        }
+
+        if (currentTag.role === 'open-close') {
+            if (lastOpenTag) {
+                currentTag.parentId = lastOpenTag.id;
+                lastOpenTag.children.push(currentTag);
+            } else {
+                // это первая нода в дереве
+                tree = currentTag;
+            }
+        }
+
+        if (currentTag.role === 'close') {
+            currentOpenTags.pop();
+            // prevOpenTag
+        }
+    }
+
+    return {
+        tree, // для рендера
+        map: tagsMap // для простого поиска
+    };
 }
 
 // возвращает готовую AST
