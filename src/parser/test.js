@@ -146,10 +146,8 @@ describe('getTags', () => {
             { name: 'div', type: 'tag', role: 'close', attributes: [], source: { startIndex: 108, endIndex: 113 } }
         ]);
     });
-    test('Should handle unclosed tag', () => {
-        expect(getTags('<div')).toStrictEqual([
-            { name: 'div', type: 'tag', role: 'open', attributes: [], source: { startIndex: 0, endIndex: 3 } }
-        ]);
+    test('Should validate unclosed tag', () => {
+        expect(() => getTags('<div')).toThrow('🥴 Забыли закрыть тег');
     });
     test('Should validate open tag symbol duplication', () => {
         expect.assertions(2);

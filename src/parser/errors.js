@@ -8,6 +8,11 @@ export const WRONG_CLOSE_TAG_SYMBOL = {
     getMessage: () => `🥴 Символ закрытия тега слишком рано. Надо сначала открыть тег`
 };
 
+export const UNCLOSED_TAG = {
+    code: 'UNCLOSED_TAG',
+    getMessage: () => `🥴 Забыли закрыть тег`
+};
+
 export const WRONG_CLOSE_TAG = {
     code: 'WRONG_CLOSE_TAG',
     getMessage: tag => `😱 Воу воу... Сначала надо открыть тег "${tag.name}"`

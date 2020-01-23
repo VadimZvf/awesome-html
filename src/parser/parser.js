@@ -6,6 +6,7 @@ function isEmptyString(str) {
 
 export function getAttributesInfo(attributesString) {
     // TODO: добавить булевые аттрибуты
+    // TODO: Добавить валидацию
     let matches;
     const attributes = [];
 
@@ -126,9 +127,11 @@ export function getTags(inputValue = '') {
     }
 
     // прошлись по всей строке но один тег не закрылся(
-    // TODO: show error
-    if (currentTag) {
-        foundTagItems.push(getTagInfo(currentTag, currentTagStart, currentTagStart + currentTag.length));
+    if (currentTagStart !== null) {
+        const error = new Error(errors.UNCLOSED_TAG.getMessage());
+        error.code = errors.UNCLOSED_TAG.code;
+        error.source = { startIndex: currentTagStart, endIndex: currentTagStart };
+        throw error;
     }
 
     return foundTagItems;
