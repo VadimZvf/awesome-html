@@ -1,4 +1,4 @@
-import parser, { getTags, getTagInfo, getAttributesInfo, getAST } from './parser';
+import { getTags, getTagInfo, getAttributesInfo, getAST } from './parser';
 
 describe('getTagInfo', () => {
     test('Should detect open tag', () => {
@@ -84,21 +84,26 @@ describe('getAttributesInfo', () => {
 describe('getTags', () => {
     test('Should return a tag', () => {
         expect(getTags('<div>')).toStrictEqual([
-            { name: 'div', type: 'tag', role: 'open', attributes: [], source: { startIndex: 1, endIndex: 3 } }
+            { name: 'div', type: 'tag', role: 'open', attributes: [], source: { startIndex: 0, endIndex: 4 } }
+        ]);
+    });
+    test('Should find a fragment', () => {
+        expect(getTags('<>')).toStrictEqual([
+            { name: '', type: 'tag', role: 'open', attributes: [], source: { startIndex: 0, endIndex: 1 } }
         ]);
     });
     test('Should trim string tag', () => {
         expect(getTags('<   div    >  ')).toStrictEqual([
-            { name: 'div', type: 'tag', role: 'open', attributes: [], source: { startIndex: 1, endIndex: 10 } }
+            { name: 'div', type: 'tag', role: 'open', attributes: [], source: { startIndex: 0, endIndex: 11 } }
         ]);
         expect(getTags('<   div    />  ')).toStrictEqual([
-            { name: 'div', type: 'tag', role: 'open-close', attributes: [], source: { startIndex: 1, endIndex: 11 } }
+            { name: 'div', type: 'tag', role: 'open-close', attributes: [], source: { startIndex: 0, endIndex: 12 } }
         ]);
     });
     test('Should return two tag', () => {
         expect(getTags('<div><span>')).toStrictEqual([
-            { name: 'div', type: 'tag', role: 'open', attributes: [], source: { startIndex: 1, endIndex: 3 } },
-            { name: 'span', type: 'tag', role: 'open', attributes: [], source: { startIndex: 6, endIndex: 9 } }
+            { name: 'div', type: 'tag', role: 'open', attributes: [], source: { startIndex: 0, endIndex: 4 } },
+            { name: 'span', type: 'tag', role: 'open', attributes: [], source: { startIndex: 5, endIndex: 10 } }
         ]);
     });
     test('Should handle empty string', () => {
@@ -109,11 +114,11 @@ describe('getTags', () => {
     });
     test('Should return tags with text nodes', () => {
         expect(getTags('<div><span>some text</span></div>')).toStrictEqual([
-            { name: 'div', type: 'tag', role: 'open', attributes: [], source: { startIndex: 1, endIndex: 3 } },
-            { name: 'span', type: 'tag', role: 'open', attributes: [], source: { startIndex: 6, endIndex: 9 } },
+            { name: 'div', type: 'tag', role: 'open', attributes: [], source: { startIndex: 0, endIndex: 4 } },
+            { name: 'span', type: 'tag', role: 'open', attributes: [], source: { startIndex: 5, endIndex: 10 } },
             { type: 'text', text: 'some text' },
-            { name: 'span', type: 'tag', role: 'close', attributes: [], source: { startIndex: 21, endIndex: 25 } },
-            { name: 'div', type: 'tag', role: 'close', attributes: [], source: { startIndex: 28, endIndex: 31 } }
+            { name: 'span', type: 'tag', role: 'close', attributes: [], source: { startIndex: 20, endIndex: 26 } },
+            { name: 'div', type: 'tag', role: 'close', attributes: [], source: { startIndex: 27, endIndex: 32 } }
         ]);
     });
     test('Should handle multiline string', () => {
@@ -126,22 +131,35 @@ describe('getTags', () => {
             </div>
         `)
         ).toStrictEqual([
-            { name: 'div', type: 'tag', role: 'open', attributes: [], source: { startIndex: 14, endIndex: 16 } },
-            { name: 'span', type: 'tag', role: 'open', attributes: [], source: { startIndex: 36, endIndex: 39 } },
+            { name: 'div', type: 'tag', role: 'open', attributes: [], source: { startIndex: 13, endIndex: 17 } },
+            { name: 'span', type: 'tag', role: 'open', attributes: [], source: { startIndex: 35, endIndex: 40 } },
             {
                 type: 'text',
                 text: `
                     some text
                 `
             },
-            { name: 'span', type: 'tag', role: 'close', attributes: [], source: { startIndex: 89, endIndex: 93 } },
-            { name: 'div', type: 'tag', role: 'close', attributes: [], source: { startIndex: 109, endIndex: 112 } }
+            { name: 'span', type: 'tag', role: 'close', attributes: [], source: { startIndex: 88, endIndex: 94 } },
+            { name: 'div', type: 'tag', role: 'close', attributes: [], source: { startIndex: 108, endIndex: 113 } }
         ]);
     });
     test('Should handle unclosed tag', () => {
         expect(getTags('<div')).toStrictEqual([
-            { name: 'div', type: 'tag', role: 'open', attributes: [], source: { startIndex: 1, endIndex: 3 } }
+            { name: 'div', type: 'tag', role: 'open', attributes: [], source: { startIndex: 0, endIndex: 3 } }
         ]);
+    });
+    test('Should validate open tag symbol duplication', () => {
+        expect.assertions(2);
+        expect(() => getTags('<div< >')).toThrow('🥴 Символ открытия тега слишком рано. Предыдущий тег еще не закрыт');
+
+        expect(() => getTags('<div< >')).toThrow(expect.objectContaining({ source: { startIndex: 4, endIndex: 4 } }));
+    });
+    test('Should validate close tag symbol duplication', () => {
+        expect.assertions(2);
+        expect(() => getTags('<div>>')).toThrow('🥴 Символ закрытия тега слишком рано. Надо сначала открыть тег');
+
+        // Должен передать и source чтобы мы смогли отрисовать ошибку
+        expect(() => getTags('<div>>')).toThrow(expect.objectContaining({ source: { startIndex: 5, endIndex: 5 } }));
     });
 });
 
@@ -151,9 +169,9 @@ describe('getAST', () => {
     const closeDivTag = { name: 'div', type: 'tag', role: 'close' };
     const openCloseDivTag = { name: 'div', type: 'tag', role: 'open-close' };
 
-    const openSpanTag = { name: 'span', type: 'tag', role: 'open' };
+    // const openSpanTag = { name: 'span', type: 'tag', role: 'open' };
     const closeSpanTag = { name: 'span', type: 'tag', role: 'close' };
-    const openCloseSpanTag = { name: 'span', type: 'tag', role: 'open-close' };
+    // const openCloseSpanTag = { name: 'span', type: 'tag', role: 'open-close' };
 
     test('should return simple nodes', () => {
         /**
@@ -429,12 +447,10 @@ describe('getAST', () => {
         const openDivTagWithSCR = { ...openDivTag, source: { start: 1, end: 3 } };
         const closeSpanTagWithSRC = { ...closeSpanTag, source: { start: 7, end: 11 } };
 
-        try {
-            getAST([openDivTagWithSCR, closeSpanTagWithSRC]);
-        } catch (err) {
-            // Должен передать и source чтобы мы смогли отрисовать ошибку
-            expect(err.source).toStrictEqual(closeSpanTagWithSRC.source);
-        }
+        // Должен передать и source чтобы мы смогли отрисовать ошибку
+        expect(() => getAST([openDivTagWithSCR, closeSpanTagWithSRC])).toThrow(
+            expect.objectContaining({ source: closeSpanTagWithSRC.source })
+        );
     });
 
     test('should validate invalid open tag', () => {
@@ -449,11 +465,9 @@ describe('getAST', () => {
 
         const openDivTagWithSRC = { ...openDivTag, source: { start: 7, end: 11 } };
 
-        try {
-            getAST([openDivTag, closeDivTag, openDivTagWithSRC]);
-        } catch (err) {
-            // Должен передать и source чтобы мы смогли отрисовать ошибку
-            expect(err.source).toStrictEqual(openDivTagWithSRC.source);
-        }
+        // Должен передать и source чтобы мы смогли отрисовать ошибку
+        expect(() => getAST([openDivTag, closeDivTag, openDivTagWithSRC])).toThrow(
+            expect.objectContaining({ source: openDivTagWithSRC.source })
+        );
     });
 });

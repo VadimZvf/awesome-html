@@ -9,12 +9,12 @@ export function getAttributesInfo(attributesString) {
     let matches;
     const attributes = [];
 
-    const singleQuoteAttributeRegexp = /(\w+?)\='([\w\s]+?)'/gi;
+    const singleQuoteAttributeRegexp = /(\w+?)='([\w\s]+?)'/gi;
     while ((matches = singleQuoteAttributeRegexp.exec(attributesString)) !== null) {
         attributes.push({ name: matches[1], value: matches[2] });
     }
 
-    const doubleQuoteAttributeRegexp = /(\w+?)\="([\w\s]+?)"/gi;
+    const doubleQuoteAttributeRegexp = /(\w+?)="([\w\s]+?)"/gi;
     while ((matches = doubleQuoteAttributeRegexp.exec(attributesString)) !== null) {
         attributes.push({ name: matches[1], value: matches[2] });
     }
@@ -35,10 +35,11 @@ export function getTagInfo(tagString, startIndex, endIndex) {
     }
 
     // TODO: добавить более подробные сорсы для тега
-    const tagNameRegexp = /^\/?([^\s\/]+).*?\/?$/gi;
-    const tagName = tagNameRegexp.exec(trimmedTagString)[1];
+    const tagNameRegexp = /^\/?([^\s/]+).*?\/?$/gi;
+    const tagNameMatch = tagNameRegexp.exec(trimmedTagString);
+    const tagName = tagNameMatch ? tagNameMatch[1] : '';
 
-    const attributesString = trimmedTagString.replace(/^\/?([^\s\/]+)/i, '').replace(/\/$/i, '');
+    const attributesString = trimmedTagString.replace(/^\/?([^\s/]+)/i, '').replace(/\/$/i, '');
 
     return {
         role,
@@ -60,13 +61,21 @@ export function getTags(inputValue = '') {
     }
 
     let currentTag = '';
-    let currentTagStart = 0;
+    let currentTagStart = null;
     let currentTextNode = '';
     let isTagOpened = false;
     const foundTagItems = [];
 
     for (let i = 0; i < inputValue.length; i++) {
         if (inputValue[i] === '<') {
+            if (currentTag) {
+                // Начался новый тег, но предыдущий еще не закрыт ☹️
+                const error = new Error(errors.WRONG_OPEN_TAG_SYMBOL.getMessage());
+                error.code = errors.WRONG_OPEN_TAG_SYMBOL.code;
+                error.source = { startIndex: i, endIndex: i };
+                throw error;
+            }
+
             // перед новым тегом была текстовая нода, надо закрыть её
             if (currentTextNode) {
                 if (!isEmptyString(currentTextNode)) {
@@ -77,15 +86,23 @@ export function getTags(inputValue = '') {
                 currentTextNode = '';
             }
 
-            currentTagStart = i + 1;
+            currentTagStart = i;
             isTagOpened = true;
             continue;
         }
 
         if (inputValue[i] === '>') {
+            if (currentTagStart === null) {
+                // Перед символом закрытия тега не оказалось символа открытия тега
+                const error = new Error(errors.WRONG_CLOSE_TAG_SYMBOL.getMessage());
+                error.code = errors.WRONG_CLOSE_TAG_SYMBOL.code;
+                error.source = { startIndex: i, endIndex: i };
+                throw error;
+            }
+
             isTagOpened = false;
-            foundTagItems.push(getTagInfo(currentTag, currentTagStart, i - 1));
-            currentTagStart = 0;
+            foundTagItems.push(getTagInfo(currentTag, currentTagStart, i));
+            currentTagStart = null;
             currentTag = '';
             continue;
         }
@@ -111,7 +128,7 @@ export function getTags(inputValue = '') {
     // прошлись по всей строке но один тег не закрылся(
     // TODO: show error
     if (currentTag) {
-        foundTagItems.push(getTagInfo(currentTag, currentTagStart, currentTagStart + currentTag.length - 1));
+        foundTagItems.push(getTagInfo(currentTag, currentTagStart, currentTagStart + currentTag.length));
     }
 
     return foundTagItems;
@@ -188,7 +205,7 @@ export function getAST(sourceTags) {
 
         if (currentTag.role === 'close') {
             if (!lastOpenTag || lastOpenTag.name !== currentTag.name) {
-                const error = new Error(errors.WRONG_CLOSE_TAG.message(currentTag));
+                const error = new Error(errors.WRONG_CLOSE_TAG.getMessage(currentTag));
                 error.code = errors.WRONG_CLOSE_TAG.code;
                 error.source = currentTag.source;
 
@@ -202,7 +219,7 @@ export function getAST(sourceTags) {
 
     if (currentOpenTags.length) {
         const notClosedTag = currentOpenTags[currentOpenTags.length - 1];
-        const error = new Error(errors.WRONG_OPEN_TAG.message(notClosedTag));
+        const error = new Error(errors.WRONG_OPEN_TAG.getMessage(notClosedTag));
         error.code = errors.WRONG_OPEN_TAG.code;
         error.source = notClosedTag.source;
 

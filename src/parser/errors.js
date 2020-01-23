@@ -1,9 +1,19 @@
+export const WRONG_OPEN_TAG_SYMBOL = {
+    code: 'WRONG_OPEN_TAG_SYMBOL',
+    getMessage: () => `🥴 Символ открытия тега слишком рано. Предыдущий тег еще не закрыт`
+};
+
+export const WRONG_CLOSE_TAG_SYMBOL = {
+    code: 'WRONG_CLOSE_TAG_SYMBOL',
+    getMessage: () => `🥴 Символ закрытия тега слишком рано. Надо сначала открыть тег`
+};
+
 export const WRONG_CLOSE_TAG = {
     code: 'WRONG_CLOSE_TAG',
-    message: tag => `😱 Воу воу... Сначала надо открыть тег "${tag.name}"`
+    getMessage: tag => `😱 Воу воу... Сначала надо открыть тег "${tag.name}"`
 };
 
 export const WRONG_OPEN_TAG = {
     code: 'WRONG_OPEN_TAG',
-    message: tag => `😭 Забыли закрыть тег "${tag.name}"`
+    getMessage: tag => `😭 Забыли закрыть тег "${tag.name}"`
 };
