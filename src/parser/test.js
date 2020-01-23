@@ -151,6 +151,10 @@ describe('getAST', () => {
     const closeDivTag = { name: 'div', type: 'tag', role: 'close' };
     const openCloseDivTag = { name: 'div', type: 'tag', role: 'open-close' };
 
+    const openSpanTag = { name: 'span', type: 'tag', role: 'open' };
+    const closeSpanTag = { name: 'span', type: 'tag', role: 'close' };
+    const openCloseSpanTag = { name: 'span', type: 'tag', role: 'open-close' };
+
     test('should return simple nodes', () => {
         /**
          * <div>
@@ -408,5 +412,48 @@ describe('getAST', () => {
                 5: { ...openCloseDivTag, id: 5, parentId: 4, children: [] }
             }
         });
+    });
+
+    test('should validate invalid close tag', () => {
+        /**
+         * <div></span>
+         */
+        expect(() => getAST([openDivTag, closeSpanTag])).toThrow('😱 Воу воу... Сначала надо открыть тег "span"');
+        /**
+         * <div></div></div>
+         */
+        expect(() => getAST([openDivTag, closeDivTag, closeDivTag])).toThrow(
+            '😱 Воу воу... Сначала надо открыть тег "div"'
+        );
+
+        const openDivTagWithSCR = { ...openDivTag, source: { start: 1, end: 3 } };
+        const closeSpanTagWithSRC = { ...closeSpanTag, source: { start: 7, end: 11 } };
+
+        try {
+            getAST([openDivTagWithSCR, closeSpanTagWithSRC]);
+        } catch (err) {
+            // Должен передать и source чтобы мы смогли отрисовать ошибку
+            expect(err.source).toStrictEqual(closeSpanTagWithSRC.source);
+        }
+    });
+
+    test('should validate invalid open tag', () => {
+        /**
+         * <div></div><div>
+         */
+        expect(() => getAST([openDivTag, closeDivTag, openDivTag])).toThrow('😭 Забыли закрыть тег "div"');
+        /**
+         * <div><div></div>
+         */
+        expect(() => getAST([openDivTag, openDivTag, closeDivTag])).toThrow('😭 Забыли закрыть тег "div"');
+
+        const openDivTagWithSRC = { ...openDivTag, source: { start: 7, end: 11 } };
+
+        try {
+            getAST([openDivTag, closeDivTag, openDivTagWithSRC]);
+        } catch (err) {
+            // Должен передать и source чтобы мы смогли отрисовать ошибку
+            expect(err.source).toStrictEqual(openDivTagWithSRC.source);
+        }
     });
 });

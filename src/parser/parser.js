@@ -1,3 +1,5 @@
+import * as errors from './errors';
+
 function isEmptyString(str) {
     return str.trim().length === 0;
 }
@@ -141,7 +143,9 @@ export function getAST(sourceTags) {
         }
     }
 
+    // список последних открытых тегов
     const currentOpenTags = [];
+    // дерево. которое мы и хотим получить
     let tree = null;
 
     for (let index = 0; index < tags.length; index++) {
@@ -183,9 +187,26 @@ export function getAST(sourceTags) {
         }
 
         if (currentTag.role === 'close') {
+            if (!lastOpenTag || lastOpenTag.name !== currentTag.name) {
+                const error = new Error(errors.WRONG_CLOSE_TAG.message(currentTag));
+                error.code = errors.WRONG_CLOSE_TAG.code;
+                error.source = currentTag.source;
+
+                throw error;
+            }
+
             currentOpenTags.pop();
             // prevOpenTag
         }
+    }
+
+    if (currentOpenTags.length) {
+        const notClosedTag = currentOpenTags[currentOpenTags.length - 1];
+        const error = new Error(errors.WRONG_OPEN_TAG.message(notClosedTag));
+        error.code = errors.WRONG_OPEN_TAG.code;
+        error.source = notClosedTag.source;
+
+        throw error;
     }
 
     return {
