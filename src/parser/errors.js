@@ -22,3 +22,23 @@ export const WRONG_OPEN_TAG = {
     code: 'WRONG_OPEN_TAG',
     getMessage: tag => `😭 Забыли закрыть тег "${tag.name}"`
 };
+
+export const INVALID_TAG = {
+    code: 'INVALID_TAG',
+    getMessage: node => `👽 Неизвестный тег "${node.name}"`
+};
+
+export const DIV_WRONG_ATTRIBUTE = {
+    code: 'DIV_WRONG_ATTRIBUTE',
+    getMessage: attr => `👽 Неизвестный аттрибут "${attr.name}". У тега div такого не бывает`
+};
+
+export const HTML_WRONG_ATTRIBUTE = {
+    code: 'DIV_WRONG_ATTRIBUTE',
+    getMessage: attr => `👽 Неизвестный аттрибут "${attr.name}". У тега html такого не бывает`
+};
+
+export const HTML_WRONG_NESTING = {
+    code: 'DIV_WRONG_NESTING',
+    getMessage: () => `👨🏾‍🦳 Тег html может быть только родителем`
+};
