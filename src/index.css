@@ -1,0 +1,44 @@
+html,
+body {
+    font-family: monospace;
+    margin: 0;
+    padding: 0;
+}
+
+.input {
+    width: 100%;
+    height: 500px;
+}
+
+.node {
+    padding-left: 24px;
+}
+
+.node__title {
+    display: flex;
+    align-items: flex-end;
+    padding: 4px 2px;
+    border-bottom: 1px solid #4f6d7a;
+}
+
+.node__name {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.node__attr {
+    margin-left: 14px;
+}
+
+.node__attr-name {
+    color: #db504a;
+}
+
+.node__attr-name::after {
+    color: black;
+    content: '=';
+}
+
+.node__attr-value {
+    color: #e3b505;
+}
