@@ -1,21 +1,38 @@
 import './index.css';
 import parseHTML from './parser';
+import search from './search';
 
 const input = document.getElementById('html-input');
-// const queryInput = document.getElementById('query-input');
+const queryInput = document.getElementById('query-input');
 const submit = document.getElementById('submit');
-// const search = document.getElementById('search');
+const searchButton = document.getElementById('search');
+const searchError = document.getElementById('search-error');
 const renderRoot = document.getElementById('render-root');
+
+let lastMapState = null;
 
 submit.addEventListener('click', () => {
     parseHTML(input.value)
         .then(({ tree, map }) => {
-            console.log(tree, map);
+            lastMapState = map;
             renderTree(tree);
         })
         .catch(error => {
             console.error(error);
             renderError(input.value, error);
+        });
+});
+
+searchButton.addEventListener('click', () => {
+    searchError.innerText = '';
+    search(lastMapState, queryInput.value)
+        .then(({ tree, map }) => {
+            lastMapState = map;
+            renderTree(tree);
+        })
+        .catch(error => {
+            console.error(error);
+            searchError.innerText = error.message;
         });
 });
 
@@ -52,6 +69,12 @@ function renderError(sourceCode, error) {
             codeWrap.appendChild(errorText);
             codeWrap.append(codeAfterError);
         }
+    } else {
+        codeWrap.append(`${sourceCode}\n`);
+        const errorText = document.createElement('span');
+        errorText.className = 'error-text';
+        errorText.innerText = `${error.message}`;
+        codeWrap.append(errorText);
     }
 
     renderRoot.appendChild(codeWrap);
@@ -59,7 +82,7 @@ function renderError(sourceCode, error) {
 
 function renderNode(node) {
     const wrap = document.createElement('div');
-    wrap.className = 'node';
+    wrap.className = `node ${node.isOpen ? 'node--open' : ''} ${node.isFound ? 'node--found' : ''}`;
 
     if (node.type === 'text') {
         const textWrap = document.createElement('div');
@@ -70,8 +93,17 @@ function renderNode(node) {
         return wrap;
     }
 
+    const canToggle = Boolean(node.children.length);
+
     const titleWrap = document.createElement('div');
-    titleWrap.className = 'node__title';
+    titleWrap.className = `node__title ${canToggle ? 'node__title--toggle' : ''}`;
+
+    // TODO: Удалять обработчики на ререндер(
+    if (canToggle) {
+        titleWrap.addEventListener('click', () => {
+            wrap.classList.toggle('node--open');
+        });
+    }
 
     const nameWrap = document.createElement('span');
     nameWrap.className = 'node__name';
@@ -113,7 +145,9 @@ function renderNode(node) {
 
 function renderTree(tree) {
     renderRoot.innerHTML = '';
-    const treeElement = renderNode(tree);
+    if (tree) {
+        const treeElement = renderNode(tree);
 
-    renderRoot.appendChild(treeElement);
+        renderRoot.appendChild(treeElement);
+    }
 }

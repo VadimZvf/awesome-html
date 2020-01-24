@@ -27,13 +27,17 @@ export function isMatchNode(map, node, query) {
 
 // Возвращает дерево, с помеченными нодами
 // в соответствии с исходным query
-function getMarkedTree(map, sourceQuery) {
+function getMarkedTree(map = {}, sourceQuery = '') {
     const query = [...sourceQuery];
     query.reverse();
 
     // Помечаем найденную ноду
     const nodesArray = Object.values(map);
     const resultNodes = nodesArray.map(node => {
+        if (node.type !== 'tag') {
+            return node;
+        }
+
         if (isMatchNode(map, node, query)) {
             node.isFound = true;
             return node;
@@ -44,7 +48,9 @@ function getMarkedTree(map, sourceQuery) {
 
     // закрываем на всякий случай все ноды
     for (const node of nodesArray) {
-        node.isOpen = false;
+        if (node.type === 'tag') {
+            node.isOpen = false;
+        }
     }
 
     // Раскрываем путь до ноды

@@ -40,7 +40,13 @@ function getSelectorValue(selector) {
     return selector;
 }
 
-function parse(sourceString) {
+function parse(sourceString = '') {
+    if (!sourceString.trim()) {
+        const error = new Error(errors.EMPTY_SELECTOR.getMessage());
+        error.code = errors.EMPTY_SELECTOR.code;
+        throw error;
+    }
+
     const selectors = sourceString
         .split(' ')
         .map(selector => selector.trim())

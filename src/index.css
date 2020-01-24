@@ -19,11 +19,31 @@ pre {
     padding-left: 24px;
 }
 
+.node > .node {
+    display: none;
+}
+
 .node__title {
     display: flex;
     align-items: flex-end;
     padding: 4px 2px;
     border-bottom: 1px solid #4f6d7a;
+}
+
+.node__title--toggle:before {
+    content: '🔺';
+}
+
+.node--open > .node {
+    display: block;
+}
+
+.node--open > .node__title:before {
+    content: '🔻';
+}
+
+.node--found > .node__title {
+    background-color: rgb(227, 181, 5, 0.4);
 }
 
 .node__name {
@@ -49,6 +69,10 @@ pre {
 }
 
 .invalid-code {
+    color: #db504a;
+}
+
+#search-error {
     color: #db504a;
 }
 
