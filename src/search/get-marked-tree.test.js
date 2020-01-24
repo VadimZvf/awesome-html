@@ -283,4 +283,43 @@ describe('getMarkedTree', () => {
             }
         });
     });
+
+    test('Should found only parent', () => {
+        // ".foo"
+        const query = [{ ...classSelector, value: 'foo' }];
+
+        const childDivNode = {
+            ...divNode,
+            id: 1,
+            parentId: 0,
+            isFound: false,
+            isOpen: false,
+            source: { endIndex: 51, startIndex: 47 },
+            attributes: []
+        };
+        const rootNode = {
+            ...divNode,
+            id: 0,
+            parentId: null,
+            isFound: true,
+            isOpen: false,
+            attributes: [{ name: 'class', value: 'foo' }],
+            source: { endIndex: 29, startIndex: 13 },
+            children: [childDivNode]
+        };
+
+        const { map } = parse(`
+            <div class="foo">
+                <div></div>
+            </div>
+        `);
+
+        expect(getMarkedTree(map, query)).toStrictEqual({
+            tree: rootNode,
+            map: {
+                0: rootNode,
+                1: childDivNode
+            }
+        });
+    });
 });

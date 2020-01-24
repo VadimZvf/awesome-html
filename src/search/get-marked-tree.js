@@ -5,34 +5,36 @@ const attributesMatcher = {
     [attributes.id.name]: attributes.id.isMatch
 };
 
-export function isMatchNode(map, node, query) {
+function isMatchNode(node, selector) {
+    let isMatch = false;
+
+    if (selector.type === 'attribute') {
+        isMatch = node.attributes.find(
+            attr => attr.name === selector.name && attributesMatcher[selector.name](attr.value, selector.value)
+        );
+    }
+
+    if (selector.type === 'tag') {
+        isMatch = selector.value === node.name;
+    }
+
+    return isMatch;
+}
+
+export function isDeepMatchNode(map, node, query) {
     const [currentSelector, ...tail] = query;
 
     if (!currentSelector) {
         return true;
     }
 
-    let isMatch = false;
-
-    if (currentSelector.type === 'attribute') {
-        isMatch = node.attributes.find(
-            attr =>
-                attr.name === currentSelector.name &&
-                attributesMatcher[currentSelector.name](attr.value, currentSelector.value)
-        );
-    }
-
-    if (currentSelector.type === 'tag') {
-        isMatch = currentSelector.value === node.name;
-    }
-
-    if (isMatch) {
-        return isMatchNode(map, map[node.parentId], tail);
+    if (isMatchNode(node, currentSelector)) {
+        return isDeepMatchNode(map, map[node.parentId], tail);
     }
 
     // Нода не подошла, но возможно есть подходящий родитель
     if (map[node.parentId]) {
-        return isMatchNode(map, map[node.parentId], query);
+        return isDeepMatchNode(map, map[node.parentId], query);
     }
 
     return false;
@@ -63,7 +65,9 @@ function getMarkedTree(map = {}, sourceQuery = '') {
             return node;
         }
 
-        if (isMatchNode(map, node, query)) {
+        const [firstSelector] = query;
+
+        if (isMatchNode(node, firstSelector) && isDeepMatchNode(map, node, query)) {
             node.isFound = true;
             foundSomeNode = true;
             return node;
