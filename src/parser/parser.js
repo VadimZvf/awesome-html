@@ -149,9 +149,7 @@ function getPreparedTags(sourceTags) {
     return sourceTags.map((tag, index) => ({ ...tag, id: index, parentId: null, children: [] }));
 }
 
-// ПРавильно ли это называть AST? O_O
-// получаем дерево из списка тегов
-export function getTree(sourceTags) {
+export function getNodesMap(sourceTags) {
     const tags = getPreparedTags(sourceTags);
     const tagsMap = {};
 
@@ -173,8 +171,6 @@ export function getTree(sourceTags) {
 
     // список последних открытых тегов
     const currentOpenTags = [];
-    // дерево. которое мы и хотим получить
-    let tree = null;
 
     for (let index = 0; index < tags.length; index++) {
         const currentTag = tags[index];
@@ -186,9 +182,6 @@ export function getTree(sourceTags) {
                 // будем искать по тексту?
                 currentTag.parentId = lastOpenTag.id;
                 lastOpenTag.children.push(currentTag);
-            } else {
-                // это первая нода в дереве
-                tree = currentTag;
             }
         }
 
@@ -196,9 +189,6 @@ export function getTree(sourceTags) {
             if (lastOpenTag) {
                 currentTag.parentId = lastOpenTag.id;
                 lastOpenTag.children.push(currentTag);
-            } else {
-                // это первая нода в дереве
-                tree = currentTag;
             }
 
             currentOpenTags.push(currentTag);
@@ -208,9 +198,6 @@ export function getTree(sourceTags) {
             if (lastOpenTag) {
                 currentTag.parentId = lastOpenTag.id;
                 lastOpenTag.children.push(currentTag);
-            } else {
-                // это первая нода в дереве
-                tree = currentTag;
             }
         }
 
@@ -237,18 +224,23 @@ export function getTree(sourceTags) {
         throw error;
     }
 
-    return {
-        tree, // для рендера
-        map: tagsMap // для простого поиска
-    };
+    return tagsMap;
+}
+
+export function getNodesTree(map) {
+    return Object.values(map).find(node => !node.parentId);
 }
 
 // возвращает готовую AST
 function parse(sourceString) {
     const tags = getTags(sourceString);
-    const tree = getTree(tags);
+    const map = getNodesMap(tags);
+    const tree = getNodesTree(map);
 
-    return tree;
+    return {
+        tree,
+        map // для простого поиска
+    };
 }
 
 export default parse;

@@ -1,6 +1,7 @@
 import * as errors from '../errors';
+import attributes from '../../attributes';
 
-const allowedAttributes = ['class', 'id'];
+const allowedAttributes = [attributes.class.name, attributes.id.name];
 
 export default {
     name: 'div',

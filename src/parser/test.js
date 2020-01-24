@@ -1,4 +1,4 @@
-import parse, { getTags, getTagInfo, getAttributesInfo, getTree } from './parser';
+import parse, { getTags, getTagInfo, getAttributesInfo, getNodesMap } from './parser';
 
 describe('getTagInfo', () => {
     test('Should detect open tag', () => {
@@ -186,7 +186,7 @@ describe('getTags', () => {
     });
 });
 
-describe('getTree', () => {
+describe('create nodes map and tree', () => {
     const textNode = { type: 'text', text: 'some text' };
     const openDivTag = { name: 'div', type: 'tag', role: 'open' };
     const closeDivTag = { name: 'div', type: 'tag', role: 'close' };
@@ -202,22 +202,14 @@ describe('getTree', () => {
          *    <div></div>
          * </div>
          */
-        expect(getTree([openDivTag, openDivTag, closeDivTag, closeDivTag])).toStrictEqual({
-            tree: {
+        expect(getNodesMap([openDivTag, openDivTag, closeDivTag, closeDivTag])).toStrictEqual({
+            0: {
                 ...openDivTag,
                 id: 0,
                 parentId: null,
                 children: [{ ...openDivTag, id: 1, parentId: 0, children: [] }]
             },
-            map: {
-                0: {
-                    ...openDivTag,
-                    id: 0,
-                    parentId: null,
-                    children: [{ ...openDivTag, id: 1, parentId: 0, children: [] }]
-                },
-                1: { ...openDivTag, id: 1, parentId: 0, children: [] }
-            }
+            1: { ...openDivTag, id: 1, parentId: 0, children: [] }
         });
         /**
          * <div>
@@ -225,8 +217,8 @@ describe('getTree', () => {
          *    <div></div>
          * </div>
          */
-        expect(getTree([openDivTag, openDivTag, closeDivTag, openDivTag, closeDivTag, closeDivTag])).toStrictEqual({
-            tree: {
+        expect(getNodesMap([openDivTag, openDivTag, closeDivTag, openDivTag, closeDivTag, closeDivTag])).toStrictEqual({
+            0: {
                 ...openDivTag,
                 id: 0,
                 parentId: null,
@@ -235,19 +227,8 @@ describe('getTree', () => {
                     { ...openDivTag, id: 3, parentId: 0, children: [] }
                 ]
             },
-            map: {
-                0: {
-                    ...openDivTag,
-                    id: 0,
-                    parentId: null,
-                    children: [
-                        { ...openDivTag, id: 1, parentId: 0, children: [] },
-                        { ...openDivTag, id: 3, parentId: 0, children: [] }
-                    ]
-                },
-                1: { ...openDivTag, id: 1, parentId: 0, children: [] },
-                3: { ...openDivTag, id: 3, parentId: 0, children: [] }
-            }
+            1: { ...openDivTag, id: 1, parentId: 0, children: [] },
+            3: { ...openDivTag, id: 3, parentId: 0, children: [] }
         });
         /**
          * <div>
@@ -256,8 +237,8 @@ describe('getTree', () => {
          *    </div>
          * </div>
          */
-        expect(getTree([openDivTag, openDivTag, openDivTag, closeDivTag, closeDivTag, closeDivTag])).toStrictEqual({
-            tree: {
+        expect(getNodesMap([openDivTag, openDivTag, openDivTag, closeDivTag, closeDivTag, closeDivTag])).toStrictEqual({
+            0: {
                 ...openDivTag,
                 id: 0,
                 parentId: null,
@@ -270,50 +251,27 @@ describe('getTree', () => {
                     }
                 ]
             },
-            map: {
-                0: {
-                    ...openDivTag,
-                    id: 0,
-                    parentId: null,
-                    children: [
-                        {
-                            ...openDivTag,
-                            id: 1,
-                            parentId: 0,
-                            children: [{ ...openDivTag, id: 2, parentId: 1, children: [] }]
-                        }
-                    ]
-                },
-                1: {
-                    ...openDivTag,
-                    id: 1,
-                    parentId: 0,
-                    children: [{ ...openDivTag, id: 2, parentId: 1, children: [] }]
-                },
-                2: { ...openDivTag, id: 2, parentId: 1, children: [] }
-            }
+            1: {
+                ...openDivTag,
+                id: 1,
+                parentId: 0,
+                children: [{ ...openDivTag, id: 2, parentId: 1, children: [] }]
+            },
+            2: { ...openDivTag, id: 2, parentId: 1, children: [] }
         });
         /**
          * <div>
          *    <div/>
          * </div>
          */
-        expect(getTree([openDivTag, openCloseDivTag, closeDivTag])).toStrictEqual({
-            tree: {
+        expect(getNodesMap([openDivTag, openCloseDivTag, closeDivTag])).toStrictEqual({
+            0: {
                 ...openDivTag,
                 id: 0,
                 parentId: null,
                 children: [{ ...openCloseDivTag, id: 1, parentId: 0, children: [] }]
             },
-            map: {
-                0: {
-                    ...openDivTag,
-                    id: 0,
-                    parentId: null,
-                    children: [{ ...openCloseDivTag, id: 1, parentId: 0, children: [] }]
-                },
-                1: { ...openCloseDivTag, id: 1, parentId: 0, children: [] }
-            }
+            1: { ...openCloseDivTag, id: 1, parentId: 0, children: [] }
         });
     });
 
@@ -321,31 +279,21 @@ describe('getTree', () => {
         /**
          * <div>some text</div>
          */
-        expect(getTree([openDivTag, textNode, closeDivTag])).toStrictEqual({
-            tree: {
+        expect(getNodesMap([openDivTag, textNode, closeDivTag])).toStrictEqual({
+            0: {
                 ...openDivTag,
                 id: 0,
                 parentId: null,
                 children: [{ ...textNode, id: 1, parentId: 0, children: [] }]
             },
-            map: {
-                0: {
-                    ...openDivTag,
-                    id: 0,
-                    parentId: null,
-                    children: [{ ...textNode, id: 1, parentId: 0, children: [] }]
-                },
-                1: { ...textNode, id: 1, parentId: 0, children: [] }
-            }
+            1: { ...textNode, id: 1, parentId: 0, children: [] }
         });
         /**
          * some text
          */
-        expect(getTree([textNode])).toStrictEqual({
-            tree: { ...textNode, id: 0, parentId: null, children: [] },
-            map: {
-                0: { ...textNode, id: 0, parentId: null, children: [] }
-            }
+        expect(getNodesMap([textNode])).toStrictEqual({
+            // tree: { ...textNode, id: 0, parentId: null, children: [] },
+            0: { ...textNode, id: 0, parentId: null, children: [] }
         });
         /**
          * <div>
@@ -353,8 +301,8 @@ describe('getTree', () => {
          *     <div></div>
          * </div>
          */
-        expect(getTree([openDivTag, textNode, openDivTag, closeDivTag, closeDivTag])).toStrictEqual({
-            tree: {
+        expect(getNodesMap([openDivTag, textNode, openDivTag, closeDivTag, closeDivTag])).toStrictEqual({
+            0: {
                 ...openDivTag,
                 id: 0,
                 parentId: null,
@@ -363,19 +311,8 @@ describe('getTree', () => {
                     { ...openDivTag, id: 2, parentId: 0, children: [] }
                 ]
             },
-            map: {
-                0: {
-                    ...openDivTag,
-                    id: 0,
-                    parentId: null,
-                    children: [
-                        { ...textNode, id: 1, parentId: 0, children: [] },
-                        { ...openDivTag, id: 2, parentId: 0, children: [] }
-                    ]
-                },
-                1: { ...textNode, id: 1, parentId: 0, children: [] },
-                2: { ...openDivTag, id: 2, parentId: 0, children: [] }
-            }
+            1: { ...textNode, id: 1, parentId: 0, children: [] },
+            2: { ...openDivTag, id: 2, parentId: 0, children: [] }
         });
     });
 
@@ -387,7 +324,7 @@ describe('getTree', () => {
          * </div>
          */
         expect(
-            getTree([
+            getNodesMap([
                 openDivTag,
                 openDivTag,
                 textNode,
@@ -398,7 +335,7 @@ describe('getTree', () => {
                 closeDivTag
             ])
         ).toStrictEqual({
-            tree: {
+            0: {
                 ...openDivTag,
                 id: 0,
                 parentId: null,
@@ -417,41 +354,20 @@ describe('getTree', () => {
                     }
                 ]
             },
-            map: {
-                0: {
-                    ...openDivTag,
-                    id: 0,
-                    parentId: null,
-                    children: [
-                        {
-                            ...openDivTag,
-                            id: 1,
-                            parentId: 0,
-                            children: [{ ...textNode, id: 2, parentId: 1, children: [] }]
-                        },
-                        {
-                            ...openDivTag,
-                            id: 4,
-                            parentId: 0,
-                            children: [{ ...openCloseDivTag, id: 5, parentId: 4, children: [] }]
-                        }
-                    ]
-                },
-                1: {
-                    ...openDivTag,
-                    id: 1,
-                    parentId: 0,
-                    children: [{ ...textNode, id: 2, parentId: 1, children: [] }]
-                },
-                2: { ...textNode, id: 2, parentId: 1, children: [] },
-                4: {
-                    ...openDivTag,
-                    id: 4,
-                    parentId: 0,
-                    children: [{ ...openCloseDivTag, id: 5, parentId: 4, children: [] }]
-                },
-                5: { ...openCloseDivTag, id: 5, parentId: 4, children: [] }
-            }
+            1: {
+                ...openDivTag,
+                id: 1,
+                parentId: 0,
+                children: [{ ...textNode, id: 2, parentId: 1, children: [] }]
+            },
+            2: { ...textNode, id: 2, parentId: 1, children: [] },
+            4: {
+                ...openDivTag,
+                id: 4,
+                parentId: 0,
+                children: [{ ...openCloseDivTag, id: 5, parentId: 4, children: [] }]
+            },
+            5: { ...openCloseDivTag, id: 5, parentId: 4, children: [] }
         });
     });
 
@@ -459,11 +375,11 @@ describe('getTree', () => {
         /**
          * <div></span>
          */
-        expect(() => getTree([openDivTag, closeSpanTag])).toThrow('😱 Воу воу... Сначала надо открыть тег "span"');
+        expect(() => getNodesMap([openDivTag, closeSpanTag])).toThrow('😱 Воу воу... Сначала надо открыть тег "span"');
         /**
          * <div></div></div>
          */
-        expect(() => getTree([openDivTag, closeDivTag, closeDivTag])).toThrow(
+        expect(() => getNodesMap([openDivTag, closeDivTag, closeDivTag])).toThrow(
             '😱 Воу воу... Сначала надо открыть тег "div"'
         );
 
@@ -471,7 +387,7 @@ describe('getTree', () => {
         const closeSpanTagWithSRC = { ...closeSpanTag, source: { start: 7, end: 11 } };
 
         // Должен передать и source чтобы мы смогли отрисовать ошибку
-        expect(() => getTree([openDivTagWithSCR, closeSpanTagWithSRC])).toThrow(
+        expect(() => getNodesMap([openDivTagWithSCR, closeSpanTagWithSRC])).toThrow(
             expect.objectContaining({ source: closeSpanTagWithSRC.source })
         );
     });
@@ -480,16 +396,16 @@ describe('getTree', () => {
         /**
          * <div></div><div>
          */
-        expect(() => getTree([openDivTag, closeDivTag, openDivTag])).toThrow('😭 Забыли закрыть тег "div"');
+        expect(() => getNodesMap([openDivTag, closeDivTag, openDivTag])).toThrow('😭 Забыли закрыть тег "div"');
         /**
          * <div><div></div>
          */
-        expect(() => getTree([openDivTag, openDivTag, closeDivTag])).toThrow('😭 Забыли закрыть тег "div"');
+        expect(() => getNodesMap([openDivTag, openDivTag, closeDivTag])).toThrow('😭 Забыли закрыть тег "div"');
 
         const openDivTagWithSRC = { ...openDivTag, source: { start: 7, end: 11 } };
 
         // Должен передать и source чтобы мы смогли отрисовать ошибку
-        expect(() => getTree([openDivTag, closeDivTag, openDivTagWithSRC])).toThrow(
+        expect(() => getNodesMap([openDivTag, closeDivTag, openDivTagWithSRC])).toThrow(
             expect.objectContaining({ source: openDivTagWithSRC.source })
         );
     });

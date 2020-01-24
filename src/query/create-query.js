@@ -1,3 +1,4 @@
+import attributes from '../attributes';
 import * as errors from './errors';
 
 function getSelectorType(selector) {
@@ -11,8 +12,8 @@ function getSelectorType(selector) {
 }
 
 const selectorAttributesNames = {
-    '.': 'class',
-    '#': 'id'
+    [attributes.class.querySymbol]: attributes.class.name,
+    [attributes.id.querySymbol]: attributes.id.name
 };
 
 function getSelectorAttributeName(selector) {
