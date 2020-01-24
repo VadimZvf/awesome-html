@@ -1,5 +1,5 @@
 import parse from '../parser/parse';
-import getMarkedTree from './getMarkedTree';
+import getMarkedTree from './get-marked-tree';
 
 const divNode = { name: 'div', type: 'tag', role: 'open', attributes: [], children: [] };
 const htmlNode = { name: 'html', type: 'tag', role: 'open', attributes: [], children: [] };

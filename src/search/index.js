@@ -1,5 +1,5 @@
 import createQuery from './create-query';
-import getMarkedTree from './getMarkedTree';
+import getMarkedTree from './get-marked-tree';
 
 function search(sourceMap, queryString) {
     return new Promise((resolve, reject) => {
