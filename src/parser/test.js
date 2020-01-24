@@ -1,4 +1,4 @@
-import parse, { getTags, getTagInfo, getAttributesInfo, getNodesMap } from './parser';
+import parse, { getTags, getTagInfo, getAttributesInfo, getNodesMap } from './parse';
 
 describe('getTagInfo', () => {
     test('Should detect open tag', () => {

@@ -2,12 +2,12 @@ import parse from '../parser/parse';
 import getMarkedTree from './getMarkedTree';
 
 const divNode = { name: 'div', type: 'tag', role: 'open', attributes: [], children: [] };
-// const htmlNode = { name: 'html', type: 'tag', role: 'open', attributes: [], children: [] };
+const htmlNode = { name: 'html', type: 'tag', role: 'open', attributes: [], children: [] };
 // const textNode = { type: 'text', text: 'some text' };
 
 const classSelector = { type: 'attribute', name: 'class', value: 'classSelector' };
-// const idSelector = { type: 'attribute', name: 'id', value: 'foo' };
-// const tagSelector = { type: 'tag', name: null, value: 'bar' };
+const idSelector = { type: 'attribute', name: 'id', value: 'foo' };
+const tagSelector = { type: 'tag', name: null, value: 'div' };
 
 describe('getMarkedTree', () => {
     test('Should mark simple tree', () => {
@@ -124,6 +124,162 @@ describe('getMarkedTree', () => {
                 2: bazDivNode,
                 5: barDivNode,
                 6: secondBazDivNode
+            }
+        });
+    });
+
+    test('Should search by tag', () => {
+        // "div"
+        const query = [tagSelector];
+
+        const fooDivNode = {
+            ...divNode,
+            id: 1,
+            parentId: 0,
+            isFound: true,
+            isOpen: false,
+            source: { endIndex: 32, startIndex: 28 },
+            attributes: [],
+            children: []
+        };
+        const rootNode = {
+            ...htmlNode,
+            id: 0,
+            parentId: null,
+            isFound: false,
+            isOpen: true,
+            source: { endIndex: 14, startIndex: 9 },
+            children: [fooDivNode]
+        };
+
+        const { map } = parse(`
+        <html>
+            <div></div>
+        </html>
+        `);
+
+        expect(getMarkedTree(map, query)).toStrictEqual({
+            tree: rootNode,
+            map: {
+                0: rootNode,
+                1: fooDivNode
+            }
+        });
+    });
+
+    test('Should search to deep, skip not matched nodes', () => {
+        // ".foo .bar"
+        const query = [
+            { ...classSelector, value: 'foo' },
+            { ...classSelector, value: 'bar' }
+        ];
+
+        const bazDivNode = {
+            ...divNode,
+            id: 4,
+            parentId: 1,
+            isFound: false,
+            isOpen: false,
+            source: { endIndex: 118, startIndex: 102 },
+            attributes: [{ name: 'class', value: 'baz' }]
+        };
+        const barDivNode = {
+            ...divNode,
+            id: 2,
+            parentId: 1,
+            isFound: true,
+            isOpen: false,
+            source: { endIndex: 78, startIndex: 62 },
+            attributes: [{ name: 'class', value: 'bar' }],
+            children: []
+        };
+        const divWrapNode = {
+            ...divNode,
+            id: 1,
+            parentId: 0,
+            isFound: false,
+            isOpen: true,
+            source: { endIndex: 44, startIndex: 40 },
+            children: [barDivNode, bazDivNode]
+        };
+        const rootNode = {
+            ...htmlNode,
+            id: 0,
+            parentId: null,
+            isFound: false,
+            isOpen: true,
+            attributes: [{ name: 'class', value: 'foo' }],
+            source: { endIndex: 26, startIndex: 9 },
+            children: [divWrapNode]
+        };
+
+        const { map } = parse(`
+        <html class="foo">
+            <div>
+                <div class="bar"></div>
+                <div class="baz"></div>
+            </div>
+        </html>
+        `);
+
+        expect(getMarkedTree(map, query)).toStrictEqual({
+            tree: rootNode,
+            map: {
+                0: rootNode,
+                1: divWrapNode,
+                2: barDivNode,
+                4: bazDivNode
+            }
+        });
+    });
+
+    test('Should only one node by id', () => {
+        // "#foo"
+        const query = [idSelector];
+
+        const fooDivNode = {
+            ...divNode,
+            id: 1,
+            parentId: 0,
+            isFound: true,
+            isOpen: false,
+            source: { endIndex: 48, startIndex: 35 },
+            attributes: [{ name: 'id', value: 'foo' }]
+        };
+        const fooSecondDivNode = {
+            ...divNode,
+            id: 3,
+            parentId: 0,
+            isFound: false,
+            isOpen: false,
+            source: { endIndex: 85, startIndex: 72 },
+            attributes: [{ name: 'id', value: 'foo' }],
+            children: []
+        };
+        const rootNode = {
+            ...divNode,
+            id: 0,
+            parentId: null,
+            isFound: false,
+            isOpen: true,
+            attributes: [],
+            source: { endIndex: 17, startIndex: 13 },
+            children: [fooDivNode, fooSecondDivNode]
+        };
+
+        const { map } = parse(`
+            <div>
+                <div id="foo"></div>
+                <div id="foo"></div>
+            </div>
+        `);
+
+        expect(getMarkedTree(map, query)).toStrictEqual({
+            tree: rootNode,
+            map: {
+                0: rootNode,
+                1: fooDivNode,
+                3: fooSecondDivNode
             }
         });
     });
