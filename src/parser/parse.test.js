@@ -158,12 +158,7 @@ describe('getTags', () => {
         ).toStrictEqual([
             { name: 'div', type: 'tag', role: 'open', attributes: [], source: { startIndex: 13, endIndex: 17 } },
             { name: 'span', type: 'tag', role: 'open', attributes: [], source: { startIndex: 35, endIndex: 40 } },
-            {
-                type: 'text',
-                text: `
-                    some text
-                `
-            },
+            { type: 'text', text: 'some text' },
             { name: 'span', type: 'tag', role: 'close', attributes: [], source: { startIndex: 88, endIndex: 94 } },
             { name: 'div', type: 'tag', role: 'close', attributes: [], source: { startIndex: 108, endIndex: 113 } }
         ]);

@@ -5,5 +5,5 @@ export const UNKNOWN_SELECTOR = {
 
 export const EMPTY_SELECTOR = {
     code: 'EMPTY_SELECTOR',
-    getMessage: () => '☹️ Пустой селектор'
+    getMessage: () => '👻 Пустой селектор'
 };

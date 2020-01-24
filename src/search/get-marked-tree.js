@@ -44,13 +44,13 @@ function getMarkedTree(map = {}, sourceQuery = '') {
     const query = [...sourceQuery];
     query.reverse();
 
-    // Костыль для того чтобы назодить только одну ноду по ID
+    // Костыль для того чтобы находить только одну ноду по ID
     // TODO: Придумать что-нибудь получше
     const hasIdInQuery = query.some(selector => selector.name === attributes.id.name);
     let foundSomeNode = false;
 
     // Помечаем найденную ноду
-    const nodesArray = Object.values(map);
+    const nodesArray = Object.values(map || {});
     const resultNodes = nodesArray.map(node => {
         if (node.type !== 'tag') {
             return node;

@@ -55,10 +55,7 @@ export function getTagInfo(tagString, startIndex, endIndex) {
         type: 'tag',
         name: tagName,
         attributes: getAttributesInfo(attributesString),
-        source: {
-            startIndex,
-            endIndex
-        }
+        source: { startIndex, endIndex }
     };
 }
 
@@ -69,15 +66,13 @@ export function getTags(inputValue = '') {
         return [];
     }
 
-    let currentTag = '';
+    let currentText = '';
     let currentTagStart = null;
-    let currentTextNode = '';
-    let isTagOpened = false;
     const foundTagItems = [];
 
     for (let i = 0; i < inputValue.length; i++) {
         if (inputValue[i] === '<') {
-            if (currentTag) {
+            if (currentTagStart !== null) {
                 // Начался новый тег, но предыдущий еще не закрыт ☹️
                 const error = new Error(errors.WRONG_OPEN_TAG_SYMBOL.getMessage());
                 error.code = errors.WRONG_OPEN_TAG_SYMBOL.code;
@@ -86,17 +81,13 @@ export function getTags(inputValue = '') {
             }
 
             // перед новым тегом была текстовая нода, надо закрыть её
-            if (currentTextNode) {
-                if (!isEmptyString(currentTextNode)) {
-                    // проверяем, вдруг текстовая нода состояла только из пробелов
-                    // TODO: add trimming
-                    foundTagItems.push({ type: 'text', text: currentTextNode });
-                }
-                currentTextNode = '';
+            if (currentText && !isEmptyString(currentText)) {
+                // проверяем, вдруг текстовая нода состояла только из пробелов
+                foundTagItems.push({ type: 'text', text: currentText.trim() });
             }
 
+            currentText = '';
             currentTagStart = i;
-            isTagOpened = true;
             continue;
         }
 
@@ -109,29 +100,20 @@ export function getTags(inputValue = '') {
                 throw error;
             }
 
-            isTagOpened = false;
-            foundTagItems.push(getTagInfo(currentTag, currentTagStart, i));
+            foundTagItems.push(getTagInfo(currentText, currentTagStart, i));
             currentTagStart = null;
-            currentTag = '';
+            currentText = '';
             continue;
         }
 
-        if (isTagOpened) {
-            // Мы находимся внутри тега
-            currentTag = `${currentTag}${inputValue[i]}`;
-            continue;
-        } else {
-            // видимо тестовая нода, раз никакой тег не открывался
-            currentTextNode = `${currentTextNode}${inputValue[i]}`;
-        }
+        // Мы находимся внутри тега или сейчас текстовая нода
+        currentText = `${currentText}${inputValue[i]}`;
     }
 
     // прошлись по всей строке но текстовая нода не закрыта, значит на входе была просто строка
-    if (currentTextNode) {
-        if (!isEmptyString(currentTextNode)) {
-            // проверяем, вдруг текстовая нода состояла только из пробелов
-            foundTagItems.push({ type: 'text', text: currentTextNode });
-        }
+    if (currentText && !isEmptyString(currentText)) {
+        // проверяем, вдруг текстовая нода состояла только из пробелов
+        foundTagItems.push({ type: 'text', text: currentText });
     }
 
     // прошлись по всей строке но один тег не закрылся(

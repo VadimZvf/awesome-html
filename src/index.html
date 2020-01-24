@@ -7,30 +7,33 @@
         <title>HTML Parser</title>
     </head>
     <body>
-        <textarea id="html-input" class="input" value=""></textarea>
-        <button id="submit">Распарсить 🚀</button>
-        <input id="query-input" class="query" value="" type="text" />
-        <button id="search">Найти 🔍</button>
-        <span id="search-error"></span>
-        <div id="render-root"></div>
-    </body>
-</html>
-<!-- <html>
+        <div class="controls">
+            <textarea id="html-input" class="input" value="">
+<html>
     <div>
-        <div>
+        <div class="input">
             <div>
                 <div id="render-root"></div>
             </div>
         </div>
-        <div />
+        <div class="input" />
         <div>HTML Parser</div>
     </div>
     <div>
-        <div id="input" class="input" value=""></div>
+        <div id="input" class="input"></div>
         <div id="submit">
             Распарсить 🚀
             <div></div>
         </div>
         <div id="render-root"></div>
     </div>
-</html> -->
+</html>
+            </textarea>
+            <button id="submit">Распарсить 🚀</button>
+            <input id="query-input" class="query" value="" type="text" placeholder="search query" />
+            <button id="search">Найти 🔍</button>
+            <span id="search-error"></span>
+        </div>
+        <div id="render-root"></div>
+    </body>
+</html>

@@ -15,6 +15,6 @@ describe('parse', () => {
         expect(() => parse('&className')).toThrow('🤬 Ошибочка. Неизвестный селектор: "&"');
     });
     test('Should handle empty selector', () => {
-        expect(() => parse('')).toThrow('☹️ Пустой селектор');
+        expect(() => parse('')).toThrow('👻 Пустой селектор');
     });
 });

@@ -18,6 +18,7 @@ submit.addEventListener('click', () => {
             renderTree(tree);
         })
         .catch(error => {
+            lastMapState = null;
             console.error(error);
             renderError(input.value, error);
         });
@@ -82,7 +83,7 @@ function renderError(sourceCode, error) {
 
 function renderNode(node) {
     const wrap = document.createElement('div');
-    wrap.className = `node ${node.isOpen ? 'node--open' : ''} ${node.isFound ? 'node--found' : ''}`;
+    wrap.className = classNames('node', node.isOpen && 'node--open', node.isFound && 'node--found');
 
     if (node.type === 'text') {
         const textWrap = document.createElement('div');
@@ -96,9 +97,8 @@ function renderNode(node) {
     const canToggle = Boolean(node.children.length);
 
     const titleWrap = document.createElement('div');
-    titleWrap.className = `node__title ${canToggle ? 'node__title--toggle' : ''}`;
+    titleWrap.className = classNames('node__title', canToggle && 'node__title--toggle');
 
-    // TODO: Удалять обработчики на ререндер(
     if (canToggle) {
         titleWrap.addEventListener('click', () => {
             wrap.classList.toggle('node--open');
@@ -150,4 +150,11 @@ function renderTree(tree) {
 
         renderRoot.appendChild(treeElement);
     }
+}
+
+function classNames(...classes) {
+    return classes
+        .filter(Boolean)
+        .map(cssClass => cssClass.trim())
+        .join(' ');
 }
