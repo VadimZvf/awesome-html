@@ -1,8 +1,10 @@
 import './index.css';
 import parseHTML from './parser';
 
-const input = document.getElementById('input');
+const input = document.getElementById('html-input');
+// const queryInput = document.getElementById('query-input');
 const submit = document.getElementById('submit');
+// const search = document.getElementById('search');
 const renderRoot = document.getElementById('render-root');
 
 submit.addEventListener('click', () => {

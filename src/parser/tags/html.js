@@ -1,6 +1,6 @@
 import * as errors from '../errors';
 
-const allowedAttributes = ['class', 'id'];
+const allowedAttributes = [];
 
 export default {
     name: 'html',
@@ -16,7 +16,7 @@ export default {
         }
 
         if (node.parentId !== null) {
-            const error = new Error(errors.HTML_WRONG_NESTING.getMessage(invalidAttribute));
+            const error = new Error(errors.HTML_WRONG_NESTING.getMessage());
             error.code = errors.HTML_WRONG_NESTING.code;
             error.source = node.source;
 
