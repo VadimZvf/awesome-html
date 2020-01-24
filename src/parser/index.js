@@ -1,4 +1,4 @@
-import parse from './parser';
+import parse from './parse';
 import validate from './validator';
 import tags from './tags';
 

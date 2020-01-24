@@ -1,4 +1,4 @@
-import { parse } from './create-query';
+import parse from './create-query';
 
 describe('parse', () => {
     test('Should create one selector query', () => {

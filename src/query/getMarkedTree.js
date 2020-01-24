@@ -27,7 +27,7 @@ export function isMatchNode(map, node, query) {
 
 // Возвращает дерево, с помеченными нодами
 // в соответствии с исходным query
-export function getMarkedTree(map, sourceQuery) {
+function getMarkedTree(map, sourceQuery) {
     const query = [...sourceQuery];
     query.reverse();
 
@@ -63,3 +63,5 @@ export function getMarkedTree(map, sourceQuery) {
         map: resultNodes.reduce((result, node) => ({ ...result, [node.id]: node }), {})
     };
 }
+
+export default getMarkedTree;

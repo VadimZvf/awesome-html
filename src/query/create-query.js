@@ -40,7 +40,7 @@ function getSelectorValue(selector) {
     return selector;
 }
 
-export function parse(sourceString) {
+function parse(sourceString) {
     const selectors = sourceString
         .split(' ')
         .map(selector => selector.trim())
@@ -54,3 +54,5 @@ export function parse(sourceString) {
 
     return selectors;
 }
+
+export default parse;
