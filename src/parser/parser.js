@@ -10,12 +10,12 @@ export function getAttributesInfo(attributesString) {
     let matches;
     const attributes = [];
 
-    const singleQuoteAttributeRegexp = /(\w+?)='([\w\s]+?)'/gi;
+    const singleQuoteAttributeRegexp = /([\w-]+?)='([^'"<>]+?)'/gi;
     while ((matches = singleQuoteAttributeRegexp.exec(attributesString)) !== null) {
         attributes.push({ name: matches[1], value: matches[2] });
     }
 
-    const doubleQuoteAttributeRegexp = /(\w+?)="([\w\s]+?)"/gi;
+    const doubleQuoteAttributeRegexp = /([\w-]+?)="([^'"<>]+?)"/gi;
     while ((matches = doubleQuoteAttributeRegexp.exec(attributesString)) !== null) {
         attributes.push({ name: matches[1], value: matches[2] });
     }
@@ -39,6 +39,14 @@ export function getTagInfo(tagString, startIndex, endIndex) {
     const tagNameRegexp = /^\/?([^\s/]+).*?\/?$/gi;
     const tagNameMatch = tagNameRegexp.exec(trimmedTagString);
     const tagName = tagNameMatch ? tagNameMatch[1] : '';
+
+    // </div/>
+    if (isCloseTag && isSelfClosed && tagName) {
+        const error = new Error(errors.INVALID_TAG_DECLARATION.getMessage());
+        error.code = errors.INVALID_TAG_DECLARATION.code;
+        error.source = { startIndex, endIndex };
+        throw error;
+    }
 
     const attributesString = trimmedTagString.replace(/^\/?([^\s/]+)/i, '').replace(/\/$/i, '');
 

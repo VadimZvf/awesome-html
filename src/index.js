@@ -3,7 +3,7 @@ import parseHTML from './parser';
 
 const input = document.getElementById('input');
 const submit = document.getElementById('submit');
-const treeRoot = document.getElementById('render-tree-root');
+const renderRoot = document.getElementById('render-root');
 
 submit.addEventListener('click', () => {
     parseHTML(input.value)
@@ -13,8 +13,47 @@ submit.addEventListener('click', () => {
         })
         .catch(error => {
             console.error(error);
+            renderError(input.value, error);
         });
 });
+
+function renderError(sourceCode, error) {
+    renderRoot.innerHTML = '';
+    const codeWrap = document.createElement('pre');
+
+    if (error.source) {
+        const codeBeforeError = sourceCode.substring(0, error.source.startIndex);
+        const invalidCode = sourceCode.substring(error.source.startIndex, error.source.endIndex + 1);
+        const codeAfterError = sourceCode.substring(error.source.endIndex + 1);
+
+        const invalidCodeWrapper = document.createElement('span');
+        invalidCodeWrapper.className = 'invalid-code';
+        invalidCodeWrapper.innerText = invalidCode;
+
+        codeWrap.append(codeBeforeError);
+        codeWrap.appendChild(invalidCodeWrapper);
+
+        const errorText = document.createElement('span');
+        errorText.className = 'error-text';
+        errorText.innerText = `${error.message}`;
+
+        const invalidLineEndIndex = codeAfterError.indexOf('\n');
+
+        if (invalidLineEndIndex !== null) {
+            const endOfInvalidLine = codeAfterError.substring(0, invalidLineEndIndex);
+            const lastPathOfCode = codeAfterError.substring(invalidLineEndIndex);
+
+            codeWrap.append(`${endOfInvalidLine}\n`);
+            codeWrap.appendChild(errorText);
+            codeWrap.append(lastPathOfCode);
+        } else {
+            codeWrap.appendChild(errorText);
+            codeWrap.append(codeAfterError);
+        }
+    }
+
+    renderRoot.appendChild(codeWrap);
+}
 
 function renderNode(node) {
     const wrap = document.createElement('div');
@@ -71,8 +110,8 @@ function renderNode(node) {
 }
 
 function renderTree(tree) {
-    treeRoot.innerHTML = '';
+    renderRoot.innerHTML = '';
     const treeElement = renderNode(tree);
 
-    treeRoot.appendChild(treeElement);
+    renderRoot.appendChild(treeElement);
 }

@@ -13,6 +13,11 @@ export const UNCLOSED_TAG = {
     getMessage: () => `🥴 Забыли закрыть тег`
 };
 
+export const INVALID_TAG_DECLARATION = {
+    code: 'INVALID_TAG_DECLARATION',
+    getMessage: () => `🥴 теги так не пишутся`
+};
+
 export const WRONG_CLOSE_TAG = {
     code: 'WRONG_CLOSE_TAG',
     getMessage: tag => `😱 Воу воу... Сначала надо открыть тег "${tag.name}"`

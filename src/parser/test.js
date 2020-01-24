@@ -58,6 +58,28 @@ describe('getTagInfo', () => {
             source: { startIndex: 0, endIndex: 23 }
         });
     });
+    test('Should validate tag declaration', () => {
+        expect(() => getTagInfo('/div/', 0, 3)).toThrow('🥴 теги так не пишутся');
+    });
+    test('Should get attributes', () => {
+        expect(getTagInfo('div charset="UTF-8" /', 0, 3)).toStrictEqual({
+            type: 'tag',
+            role: 'open-close',
+            name: 'div',
+            attributes: [{ name: 'charset', value: 'UTF-8' }],
+            source: { startIndex: 0, endIndex: 3 }
+        });
+        expect(getTagInfo('div class="wow foo" data-testid="wow" /', 0, 3)).toStrictEqual({
+            type: 'tag',
+            role: 'open-close',
+            name: 'div',
+            attributes: [
+                { name: 'class', value: 'wow foo' },
+                { name: 'data-testid', value: 'wow' }
+            ],
+            source: { startIndex: 0, endIndex: 3 }
+        });
+    });
 });
 
 describe('getAttributesInfo', () => {

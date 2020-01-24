@@ -1,13 +1,18 @@
 html,
 body {
-    font-family: monospace;
+    font-family: monospace, serif;
     margin: 0;
     padding: 0;
+}
+
+pre {
+    padding: 20px 40px;
 }
 
 .input {
     width: 100%;
     height: 500px;
+    font-family: monospace, serif;
 }
 
 .node {
@@ -41,4 +46,16 @@ body {
 
 .node__attr-value {
     color: #e3b505;
+}
+
+.invalid-code {
+    color: #db504a;
+}
+
+.error-text {
+    display: inline-block;
+    width: 100%;
+    padding: 5px 22px;
+    background-color: rgb(219, 80, 74, 0.2);
+    color: #db504a;
 }
