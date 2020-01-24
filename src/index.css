@@ -23,6 +23,11 @@ pre {
     display: none;
 }
 
+.node__text {
+    padding: 4px 2px;
+    border-bottom: 1px solid #4f6d7a;
+}
+
 .node__title {
     display: flex;
     align-items: flex-end;
