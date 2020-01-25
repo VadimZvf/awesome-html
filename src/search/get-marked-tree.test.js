@@ -358,7 +358,10 @@ describe('getMarkedTree', () => {
 
     test('Should find next node', () => {
         // "#foo + div"
-        const query = [{ type: 'NEXT_NODE', value: { type: 'TAG', value: 'div' } }];
+        const query = [
+            { type: 'NEXT_NODE', value: { type: 'ID_ATTR', value: 'foo' } },
+            { type: 'TAG', value: 'div' }
+        ];
 
         const { map } = parse(`
             <div>
