@@ -1,3 +1,4 @@
+import attributes from '../attributes';
 import * as errors from './errors';
 
 const whitespace = '[\\x20\\t\\r\\n\\f]';
@@ -11,7 +12,39 @@ export const combinatorsCodes = {
     TAG: 'TAG'
 };
 
-export default {
+export function getMatchedNode(node, map, selector) {
+    const match = combinators[selector.type].match;
+
+    if (typeof match !== 'function') {
+        const error = new Error(errors.UNKNOWN_SELECTOR.getMessage(selector.type));
+        error.code = errors.UNKNOWN_SELECTOR.code;
+        throw error;
+    }
+
+    const matchedNode = match(node, map, selector);
+
+    if (matchedNode) {
+        return matchedNode;
+    }
+
+    return null;
+}
+
+function getDeepMatchNode(node, map, selector) {
+    const matchedNode = getMatchedNode(node, map, selector);
+    if (matchedNode) {
+        return matchedNode;
+    }
+
+    // Нода не подошла, но возможно есть подходящий родитель
+    if (map[node.parentId]) {
+        return getDeepMatchNode(map[node.parentId], map, selector);
+    }
+
+    return null;
+}
+
+const combinators = {
     CHILD: {
         cutOff: ({ sourceSelector, query }) => {
             let resultSourceSelector = sourceSelector;
@@ -51,9 +84,11 @@ export default {
             const newQuery = [...query.slice(0, -1), { type: combinatorsCodes.CHILD, value: lastSelector }];
 
             return { sourceSelector: resultSourceSelector, query: newQuery };
-        }
+        },
 
-        // visitor: (node, map) => {}
+        match: (node, map, selector) => {
+            return getDeepMatchNode(map[node.parentId], map, selector.value);
+        }
     },
 
     FIRST_CHILD: {
@@ -159,6 +194,16 @@ export default {
             const newQuery = [...query, { type: combinatorsCodes.ID_ATTR, value: targetId }];
 
             return { sourceSelector: resultSourceSelector, query: newQuery };
+        },
+
+        match: (node, map, selector) => {
+            const isMatch =
+                node.attributes &&
+                node.attributes.find(
+                    attr => attr.name === attributes.id.name && attributes.id.isMatch(attr.value, selector.value)
+                );
+
+            return isMatch ? node : null;
         }
     },
 
@@ -181,6 +226,15 @@ export default {
             const newQuery = [...query, { type: combinatorsCodes.CLASS_ATTR, value: targetClass }];
 
             return { sourceSelector: resultSourceSelector, query: newQuery };
+        },
+
+        match: (node, map, selector) => {
+            const isMatch =
+                node.attributes &&
+                node.attributes.find(
+                    attr => attr.name === attributes.class.name && attributes.class.isMatch(attr.value, selector.value)
+                );
+            return isMatch ? node : null;
         }
     },
 
@@ -202,6 +256,13 @@ export default {
             const newQuery = [...query, { type: combinatorsCodes.TAG, value: tagName }];
 
             return { sourceSelector: resultSourceSelector, query: newQuery };
+        },
+
+        match: (node, map, selector) => {
+            const isMatch = node.name === selector.value;
+            return isMatch ? node : null;
         }
     }
 };
+
+export default combinators;

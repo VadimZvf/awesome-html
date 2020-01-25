@@ -5,9 +5,9 @@ const divNode = { name: 'div', type: 'tag', role: 'open', attributes: [], childr
 const htmlNode = { name: 'html', type: 'tag', role: 'open', attributes: [], children: [] };
 // const textNode = { type: 'text', text: 'some text' };
 
-const classSelector = { type: 'attribute', name: 'class', value: 'classSelector' };
-const idSelector = { type: 'attribute', name: 'id', value: 'foo' };
-const tagSelector = { type: 'tag', name: null, value: 'div' };
+const classSelector = { type: 'CLASS_ATTR', value: 'classSelector' };
+const idSelector = { type: 'ID_ATTR', value: 'foo' };
+const tagSelector = { type: 'TAG', value: 'div' };
 
 describe('getMarkedTree', () => {
     test('Should mark simple tree', () => {
@@ -53,7 +53,7 @@ describe('getMarkedTree', () => {
     test('Should search by two selectors', () => {
         // ".bar .baz"
         const query = [
-            { ...classSelector, value: 'bar' },
+            { type: 'CHILD', value: { type: 'CLASS_ATTR', value: 'bar' } },
             { ...classSelector, value: 'baz' }
         ];
 
@@ -170,7 +170,7 @@ describe('getMarkedTree', () => {
     test('Should search to deep, skip not matched nodes', () => {
         // ".foo .bar"
         const query = [
-            { ...classSelector, value: 'foo' },
+            { type: 'CHILD', value: { type: 'CLASS_ATTR', value: 'foo' } },
             { ...classSelector, value: 'bar' }
         ];
 
@@ -340,7 +340,7 @@ describe('getMarkedTree', () => {
     test('Should find only one element by id and class', () => {
         // ".bar #foo"
         const query = [
-            { ...classSelector, value: 'bar' },
+            { type: 'CHILD', value: { type: 'CLASS_ATTR', value: 'bar' } },
             { ...idSelector, value: 'foo' }
         ];
 

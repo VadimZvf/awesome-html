@@ -1,40 +1,16 @@
-import attributes from '../attributes';
+import { getMatchedNode, combinatorsCodes } from './combinators';
 
-const attributesMatcher = {
-    [attributes.class.name]: attributes.class.isMatch,
-    [attributes.id.name]: attributes.id.isMatch
-};
-
-function isMatchNode(node, selector) {
-    let isMatch = false;
-
-    if (selector.type === 'attribute') {
-        isMatch = node.attributes.find(
-            attr => attr.name === selector.name && attributesMatcher[selector.name](attr.value, selector.value)
-        );
-    }
-
-    if (selector.type === 'tag') {
-        isMatch = selector.value === node.name;
-    }
-
-    return isMatch;
-}
-
-export function isDeepMatchNode(map, node, query) {
+export function isMatchNodeByQuery(node, map, query) {
     const [currentSelector, ...tail] = query;
 
     if (!currentSelector) {
         return true;
     }
 
-    if (isMatchNode(node, currentSelector)) {
-        return isDeepMatchNode(map, map[node.parentId], tail);
-    }
+    const matchedNode = getMatchedNode(node, map, currentSelector);
 
-    // Нода не подошла, но возможно есть подходящий родитель
-    if (map[node.parentId]) {
-        return isDeepMatchNode(map, map[node.parentId], query);
+    if (matchedNode) {
+        return isMatchNodeByQuery(matchedNode, map, tail);
     }
 
     return false;
@@ -48,7 +24,7 @@ function getMarkedTree(map = {}, sourceQuery = []) {
 
     // Костыль для того чтобы находить только одну ноду по ID
     // TODO: Придумать что-нибудь получше
-    const hasIdInQuery = query.some(selector => selector.name === attributes.id.name);
+    const hasIdInQuery = query.some(selector => selector.type === combinatorsCodes.ID_ATTR);
     let foundSomeNode = false;
 
     // Помечаем найденную ноду
@@ -65,9 +41,7 @@ function getMarkedTree(map = {}, sourceQuery = []) {
             return node;
         }
 
-        const [firstSelector] = query;
-
-        if (isMatchNode(node, firstSelector) && isDeepMatchNode(map, node, query)) {
+        if (isMatchNodeByQuery(node, map, query)) {
             node.isFound = true;
             foundSomeNode = true;
             return node;

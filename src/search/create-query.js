@@ -1,64 +1,48 @@
-import attributes from '../attributes';
+import combinations from './combinators';
 import * as errors from './errors';
 
-function getSelectorType(selector) {
-    const tagRegex = /^\w/;
+const combinationsCutOff = [
+    combinations.CHILD.cutOff,
+    combinations.FIRST_CHILD.cutOff,
+    combinations.NEXT_NODE.cutOff,
+    combinations.CLASS_ATTR.cutOff,
+    combinations.ID_ATTR.cutOff,
+    combinations.TAG.cutOff
+];
 
-    if (tagRegex.test(selector)) {
-        return 'tag';
-    }
-
-    return 'attribute';
-}
-
-const selectorAttributesNames = {
-    [attributes.class.querySymbol]: attributes.class.name,
-    [attributes.id.querySymbol]: attributes.id.name
-};
-
-function getSelectorAttributeName(selector) {
-    if (getSelectorType(selector) !== 'attribute') {
-        return null;
-    }
-
-    const selectorSymbol = selector[0];
-
-    if (selectorAttributesNames[selectorSymbol]) {
-        return selectorAttributesNames[selectorSymbol];
-    }
-
-    const error = new Error(errors.UNKNOWN_SELECTOR.getMessage(selectorSymbol));
-    error.code = errors.UNKNOWN_SELECTOR.code;
-    throw error;
-}
-
-function getSelectorValue(selector) {
-    if (getSelectorType(selector) === 'attribute') {
-        return selector.substring(1);
-    }
-
-    return selector;
+function prepareQueryString(sourceString) {
+    return sourceString.replace(/ +(?= )/g, '').trim();
 }
 
 function parse(sourceString = '') {
-    if (!sourceString.trim()) {
+    const preparedSource = prepareQueryString(sourceString);
+
+    if (!preparedSource) {
         const error = new Error(errors.EMPTY_SELECTOR.getMessage());
         error.code = errors.EMPTY_SELECTOR.code;
         throw error;
     }
 
-    const selectors = sourceString
-        .split(' ')
-        .map(selector => selector.trim())
-        .map(selector => {
-            return {
-                type: getSelectorType(selector),
-                name: getSelectorAttributeName(selector),
-                value: getSelectorValue(selector)
-            };
-        });
+    let queryStringToParse = preparedSource;
+    let query = [];
 
-    return selectors;
+    while (queryStringToParse) {
+        const prevSource = queryStringToParse;
+
+        for (const cutOff of combinationsCutOff) {
+            const result = cutOff({ sourceSelector: queryStringToParse, query });
+            queryStringToParse = result.sourceSelector;
+            query = result.query;
+        }
+
+        if (queryStringToParse === prevSource) {
+            const error = new Error(errors.UNKNOWN_SELECTOR.getMessage(queryStringToParse));
+            error.code = errors.UNKNOWN_SELECTOR.code;
+            throw error;
+        }
+    }
+
+    return query;
 }
 
 export default parse;
