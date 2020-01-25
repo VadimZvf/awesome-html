@@ -107,6 +107,19 @@ describe('ID_ATTR', () => {
 
         expect(
             combinations.ID_ATTR.cutOff({
+                sourceSelector: '#some-id',
+                query: [{ type: 'CLASS_ATTR', value: 'firstClass' }]
+            })
+        ).toStrictEqual({
+            sourceSelector: '',
+            query: [
+                { type: 'CLASS_ATTR', value: 'firstClass' },
+                { type: 'ID_ATTR', value: 'some-id' }
+            ]
+        });
+
+        expect(
+            combinations.ID_ATTR.cutOff({
                 sourceSelector: '#someId .someSecondClass',
                 query: [{ type: 'CLASS_ATTR', value: 'firstClass' }]
             })

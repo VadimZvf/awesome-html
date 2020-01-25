@@ -197,7 +197,7 @@ const combinators = {
         cutOff: ({ sourceSelector, query }) => {
             let resultSourceSelector = sourceSelector;
 
-            const regexp = new RegExp('^(#\\w+)');
+            const regexp = new RegExp('^(#[\\w-]+)');
 
             const match = regexp.exec(sourceSelector);
 
