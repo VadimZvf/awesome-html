@@ -130,6 +130,10 @@ const combinators = {
             const newQuery = [...query.slice(0, -1), { type: combinatorsCodes.FIRST_CHILD, value: lastSelector }];
 
             return { sourceSelector: resultSourceSelector, query: newQuery };
+        },
+
+        match: (node, map, selector) => {
+            return getMatchedNode(map[node.parentId], map, selector.value);
         }
     },
 
@@ -172,6 +176,20 @@ const combinators = {
             const newQuery = [...query.slice(0, -1), { type: combinatorsCodes.NEXT_NODE, value: lastSelector }];
 
             return { sourceSelector: resultSourceSelector, query: newQuery };
+        },
+
+        match: (node, map, selector) => {
+            const parentNode = map[node.parentId];
+
+            if (!parentNode) {
+                return null;
+            }
+
+            const currentNodeIndex = parentNode.children.findIndex(child => child.id === node.id);
+
+            const rightNode = parentNode.children[currentNodeIndex - 1];
+
+            return rightNode ? getMatchedNode(rightNode, map, selector.value) : null;
         }
     },
 

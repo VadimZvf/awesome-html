@@ -2,9 +2,9 @@ import combinations from './combinators';
 import * as errors from './errors';
 
 const combinationsCutOff = [
-    combinations.CHILD.cutOff,
     combinations.FIRST_CHILD.cutOff,
     combinations.NEXT_NODE.cutOff,
+    combinations.CHILD.cutOff,
     combinations.CLASS_ATTR.cutOff,
     combinations.ID_ATTR.cutOff,
     combinations.TAG.cutOff

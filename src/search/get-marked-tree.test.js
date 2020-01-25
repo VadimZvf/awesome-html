@@ -355,4 +355,39 @@ describe('getMarkedTree', () => {
 
         expect(getMarkedTree(map, query)).toMatchSnapshot();
     });
+
+    test('Should find next node', () => {
+        // "#foo + div"
+        const query = [{ type: 'NEXT_NODE', value: { type: 'TAG', value: 'div' } }];
+
+        const { map } = parse(`
+            <div>
+                <div id="foo"></div>
+                <div class="bar">
+                    <div></div>
+                </div>
+            </div>
+        `);
+
+        expect(getMarkedTree(map, query)).toMatchSnapshot();
+    });
+
+    test('Should find first child node', () => {
+        // "#foo > .bar"
+        const query = [
+            { type: 'FIRST_CHILD', value: { type: 'ID_ATTR', value: 'foo' } },
+            { type: 'CLASS_ATTR', value: 'bar' }
+        ];
+
+        const { map } = parse(`
+            <div id="foo">
+                <div class="bar"></div>
+                <div>
+                    <div class="bar"></div>
+                </div>
+            </div>
+        `);
+
+        expect(getMarkedTree(map, query)).toMatchSnapshot();
+    });
 });
