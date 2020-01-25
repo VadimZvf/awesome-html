@@ -375,6 +375,24 @@ describe('getMarkedTree', () => {
         expect(getMarkedTree(map, query)).toMatchSnapshot();
     });
 
+    test('Should find next node, that matched by query', () => {
+        // "#foo + .bar"
+        const query = [
+            { type: 'NEXT_NODE', value: { type: 'ID_ATTR', value: 'foo' } },
+            { type: 'CLASS_ATTR', value: 'bar' }
+        ];
+
+        const { map } = parse(`
+            <div>
+                <div id="foo"></div>
+                <div></div>
+                <div class="bar"></div>
+            </div>
+        `);
+
+        expect(getMarkedTree(map, query)).toMatchSnapshot();
+    });
+
     test('Should find first child node', () => {
         // "#foo > .bar"
         const query = [

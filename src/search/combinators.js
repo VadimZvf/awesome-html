@@ -181,15 +181,14 @@ const combinators = {
         match: (node, map, selector) => {
             const parentNode = map[node.parentId];
 
-            if (!parentNode) {
+            if (!parentNode || !parentNode.children.length) {
                 return null;
             }
 
             const currentNodeIndex = parentNode.children.findIndex(child => child.id === node.id);
 
-            const rightNode = parentNode.children[currentNodeIndex - 1];
-
-            return rightNode ? getMatchedNode(rightNode, map, selector.value) : null;
+            const rightNodes = parentNode.children.slice(0, currentNodeIndex);
+            return rightNodes.find(rightNode => getMatchedNode(rightNode, map, selector.value)) || null;
         }
     },
 
