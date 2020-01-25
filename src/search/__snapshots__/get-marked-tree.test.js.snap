@@ -1,0 +1,170 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getMarkedTree Should search node with two classes 1`] = `
+Object {
+  "map": Object {
+    "0": Object {
+      "attributes": Array [
+        Object {
+          "name": "class",
+          "value": "foo",
+        },
+      ],
+      "children": Array [
+        Object {
+          "attributes": Array [
+            Object {
+              "name": "class",
+              "value": "bar",
+            },
+          ],
+          "children": Array [],
+          "id": 1,
+          "isFound": false,
+          "isOpen": false,
+          "name": "div",
+          "parentId": 0,
+          "role": "open",
+          "source": Object {
+            "endIndex": 63,
+            "startIndex": 47,
+          },
+          "type": "tag",
+        },
+        Object {
+          "attributes": Array [
+            Object {
+              "name": "class",
+              "value": "foo bar",
+            },
+          ],
+          "children": Array [],
+          "id": 3,
+          "isFound": true,
+          "isOpen": false,
+          "name": "div",
+          "parentId": 0,
+          "role": "open",
+          "source": Object {
+            "endIndex": 107,
+            "startIndex": 87,
+          },
+          "type": "tag",
+        },
+      ],
+      "id": 0,
+      "isFound": false,
+      "isOpen": true,
+      "name": "div",
+      "parentId": null,
+      "role": "open",
+      "source": Object {
+        "endIndex": 29,
+        "startIndex": 13,
+      },
+      "type": "tag",
+    },
+    "1": Object {
+      "attributes": Array [
+        Object {
+          "name": "class",
+          "value": "bar",
+        },
+      ],
+      "children": Array [],
+      "id": 1,
+      "isFound": false,
+      "isOpen": false,
+      "name": "div",
+      "parentId": 0,
+      "role": "open",
+      "source": Object {
+        "endIndex": 63,
+        "startIndex": 47,
+      },
+      "type": "tag",
+    },
+    "3": Object {
+      "attributes": Array [
+        Object {
+          "name": "class",
+          "value": "foo bar",
+        },
+      ],
+      "children": Array [],
+      "id": 3,
+      "isFound": true,
+      "isOpen": false,
+      "name": "div",
+      "parentId": 0,
+      "role": "open",
+      "source": Object {
+        "endIndex": 107,
+        "startIndex": 87,
+      },
+      "type": "tag",
+    },
+  },
+  "tree": Object {
+    "attributes": Array [
+      Object {
+        "name": "class",
+        "value": "foo",
+      },
+    ],
+    "children": Array [
+      Object {
+        "attributes": Array [
+          Object {
+            "name": "class",
+            "value": "bar",
+          },
+        ],
+        "children": Array [],
+        "id": 1,
+        "isFound": false,
+        "isOpen": false,
+        "name": "div",
+        "parentId": 0,
+        "role": "open",
+        "source": Object {
+          "endIndex": 63,
+          "startIndex": 47,
+        },
+        "type": "tag",
+      },
+      Object {
+        "attributes": Array [
+          Object {
+            "name": "class",
+            "value": "foo bar",
+          },
+        ],
+        "children": Array [],
+        "id": 3,
+        "isFound": true,
+        "isOpen": false,
+        "name": "div",
+        "parentId": 0,
+        "role": "open",
+        "source": Object {
+          "endIndex": 107,
+          "startIndex": 87,
+        },
+        "type": "tag",
+      },
+    ],
+    "id": 0,
+    "isFound": false,
+    "isOpen": true,
+    "name": "div",
+    "parentId": null,
+    "role": "open",
+    "source": Object {
+      "endIndex": 29,
+      "startIndex": 13,
+    },
+    "type": "tag",
+  },
+}
+`;

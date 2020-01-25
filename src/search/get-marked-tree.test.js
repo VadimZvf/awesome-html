@@ -322,4 +322,18 @@ describe('getMarkedTree', () => {
             }
         });
     });
+
+    test('Should search node with two classes', () => {
+        // ".foo.bar"
+        const query = [{ ...classSelector, value: 'foo.bar' }];
+
+        const { map } = parse(`
+            <div class="foo">
+                <div class="bar"></div>
+                <div class="foo bar"></div>
+            </div>
+        `);
+
+        expect(getMarkedTree(map, query)).toMatchSnapshot();
+    });
 });
