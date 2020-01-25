@@ -42,7 +42,7 @@ export function isDeepMatchNode(map, node, query) {
 
 // Возвращает дерево, с помеченными нодами
 // в соответствии с исходным query
-function getMarkedTree(map = {}, sourceQuery = '') {
+function getMarkedTree(map = {}, sourceQuery = []) {
     const query = [...sourceQuery];
     query.reverse();
 

@@ -336,4 +336,23 @@ describe('getMarkedTree', () => {
 
         expect(getMarkedTree(map, query)).toMatchSnapshot();
     });
+
+    test('Should find only one element by id and class', () => {
+        // ".bar #foo"
+        const query = [
+            { ...classSelector, value: 'bar' },
+            { ...idSelector, value: 'foo' }
+        ];
+
+        const { map } = parse(`
+            <div>
+                <div id="foo"></div>
+                <div class="bar">
+                    <div id="foo"></div>
+                </div>
+            </div>
+        `);
+
+        expect(getMarkedTree(map, query)).toMatchSnapshot();
+    });
 });
