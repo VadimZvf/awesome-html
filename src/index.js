@@ -41,6 +41,10 @@ function renderError(sourceCode, error) {
     renderRoot.innerHTML = '';
     const codeWrap = document.createElement('pre');
 
+    const errorText = document.createElement('span');
+    errorText.className = 'error-text';
+    errorText.innerText = `${error.message}`;
+
     if (error.source) {
         const codeBeforeError = sourceCode.substring(0, error.source.startIndex);
         const invalidCode = sourceCode.substring(error.source.startIndex, error.source.endIndex + 1);
@@ -52,10 +56,6 @@ function renderError(sourceCode, error) {
 
         codeWrap.append(codeBeforeError);
         codeWrap.appendChild(invalidCodeWrapper);
-
-        const errorText = document.createElement('span');
-        errorText.className = 'error-text';
-        errorText.innerText = `${error.message}`;
 
         const invalidLineEndIndex = codeAfterError.indexOf('\n');
 
@@ -72,9 +72,6 @@ function renderError(sourceCode, error) {
         }
     } else {
         codeWrap.append(`${sourceCode}\n`);
-        const errorText = document.createElement('span');
-        errorText.className = 'error-text';
-        errorText.innerText = `${error.message}`;
         codeWrap.append(errorText);
     }
 
