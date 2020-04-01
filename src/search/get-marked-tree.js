@@ -28,7 +28,7 @@ function getMarkedTree(map = {}, sourceQuery = []) {
     let foundSomeNode = false;
 
     // Помечаем найденную ноду
-    const nodesArray = Object.values(map || {});
+    const nodesArray = Object.values(map);
     const resultNodes = nodesArray.map(node => {
         if (node.type !== 'tag') {
             return node;

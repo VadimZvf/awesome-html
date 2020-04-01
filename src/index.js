@@ -59,17 +59,12 @@ function renderError(sourceCode, error) {
 
         const invalidLineEndIndex = codeAfterError.indexOf('\n');
 
-        if (invalidLineEndIndex !== null) {
-            const endOfInvalidLine = codeAfterError.substring(0, invalidLineEndIndex);
-            const lastPathOfCode = codeAfterError.substring(invalidLineEndIndex);
+        const endOfInvalidLine = codeAfterError.substring(0, invalidLineEndIndex);
+        const lastPathOfCode = codeAfterError.substring(invalidLineEndIndex);
 
-            codeWrap.append(`${endOfInvalidLine}\n`);
-            codeWrap.appendChild(errorText);
-            codeWrap.append(lastPathOfCode);
-        } else {
-            codeWrap.appendChild(errorText);
-            codeWrap.append(codeAfterError);
-        }
+        codeWrap.append(`${endOfInvalidLine}\n`);
+        codeWrap.appendChild(errorText);
+        codeWrap.append(lastPathOfCode);
     } else {
         codeWrap.append(`${sourceCode}\n`);
         codeWrap.append(errorText);
@@ -108,7 +103,7 @@ function renderNode(node) {
 
     titleWrap.appendChild(nameWrap);
 
-    if (node.attributes && node.attributes.length) {
+    if (Array.isArray(node.attributes)) {
         node.attributes.map(attr => {
             const attrWrap = document.createElement('div');
             attrWrap.className = 'node__attr';
@@ -130,12 +125,10 @@ function renderNode(node) {
 
     wrap.appendChild(titleWrap);
 
-    if (node.children && node.children.length) {
-        node.children
-            .map(child => renderNode(child))
-            .map(childElement => {
-                wrap.appendChild(childElement);
-            });
+    if (Array.isArray(node.children)) {
+        node.children.map(childElement => {
+            wrap.appendChild(renderNode(childElement));
+        });
     }
     return wrap;
 }
